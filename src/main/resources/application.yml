@@ -1,0 +1,15 @@
+optaplanner:
+  solver:
+    termination:
+      spent-limit: PT30S # 30 seconds solving time
+    domain-access-type: REFLECTION
+  solver-manager:
+    parallel-solver-count: AUTO
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.school.timetabling: DEBUG
+    org.optaplanner: INFO

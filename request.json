@@ -1,0 +1,93 @@
+{
+  "timeslotList": [
+    {"id": 1, "dayOfWeek": "MONDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 2, "dayOfWeek": "MONDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 3, "dayOfWeek": "MONDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 4, "dayOfWeek": "MONDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 5, "dayOfWeek": "MONDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 6, "dayOfWeek": "MONDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+
+    {"id": 7, "dayOfWeek": "TUESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 8, "dayOfWeek": "TUESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 9, "dayOfWeek": "TUESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 10, "dayOfWeek": "TUESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 11, "dayOfWeek": "TUESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 12, "dayOfWeek": "TUESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+
+    {"id": 13, "dayOfWeek": "WEDNESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 14, "dayOfWeek": "WEDNESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 15, "dayOfWeek": "WEDNESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 16, "dayOfWeek": "WEDNESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 17, "dayOfWeek": "WEDNESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 18, "dayOfWeek": "WEDNESDAY", "startTime": "11:30:00", "endTime": "12:10:00"}
+  ],
+  "classList": [
+    {
+      "grade": "9th",
+      "classes": ["A", "B", "C", "D"]
+    },
+    {
+      "grade": "10th", 
+      "classes": ["A", "B", "C", "D"]
+    }
+  ],
+  "teacherWorkloadConfig": {
+    "totalTimeslotsPerWeek": 18,
+    "freePeriodsPerTeacherPerWeek": 5,
+    "maxPeriodsPerTeacherPerWeek": 13
+  },
+  "subjectList": [
+    "Math", "English", "Chemistry", "Physics", "Biology"
+  ],
+  "lessonAssignmentList": [
+    {
+      "subject": "Math",
+      "grade": "9th",
+      "possibleTeachers": ["Tharindu Silva", "Malinda Perera"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "English",
+      "grade": "9th",
+      "possibleTeachers": ["William Shakespeare", "Jane Austen"],
+      "periodsPerWeek": 4,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Chemistry",
+      "grade": "9th",
+      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier"],
+      "periodsPerWeek": 2,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Physics",
+      "grade": "9th",
+      "possibleTeachers": ["Albert Einstein", "Isaac Newton"],
+      "periodsPerWeek": 2,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Biology",
+      "grade": "9th",
+      "possibleTeachers": ["Charles Darwin", "Gregor Mendel"],
+      "periodsPerWeek": 2,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Math",
+      "grade": "10th",
+      "possibleTeachers": ["Danul", "Kasun", "Nimal"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "English",
+      "grade": "10th",
+      "possibleTeachers": ["William Shakespeare", "Jane Austen","Rashika Ramachandran"],
+      "periodsPerWeek": 4,
+      "maxPeriodsPerDay": 2
+    }
+  ]
+}
