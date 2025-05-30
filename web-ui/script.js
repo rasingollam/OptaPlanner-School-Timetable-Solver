@@ -3,6 +3,7 @@ let currentTimetableData = null;
 let subjectColorMap = new Map();
 let availableDays = [];
 let availableTimeSlots = [];
+let currentRequestData = null; // Add this to store the original request
 
 async function loadRequestJson() {
     // Try multiple possible paths for request.json
@@ -167,6 +168,9 @@ async function processTimetable() {
         showValidationError(`Invalid JSON: ${validation.error}`);
         return;
     }
+    
+    // Store the request data for later use
+    currentRequestData = validation.data;
     
     // Extract timeslot info from current input
     extractTimeslotInfo(validation.data.timeslotList);
@@ -367,38 +371,183 @@ function displayTeacherWorkload(workloadSummary) {
         return;
     }
     
-    // Get max workload from the current data or use default
-    const maxWorkload = Math.max(...Object.values(workloadSummary), 20);
-    let html = '<div class="row">';
+    // Get max workload from the original request data instead of hardcoded value
+    let maxWorkload = 20; // Default fallback
     
-    Object.entries(workloadSummary).forEach(([teacher, workload], index) => {
-        const percentage = Math.min((workload / maxWorkload) * 100, 100);
-        
-        if (index % 2 === 0 && index > 0) {
-            html += '</div><div class="row mt-3">';
-        }
+    if (currentRequestData && 
+        currentRequestData.teacherWorkloadConfig && 
+        currentRequestData.teacherWorkloadConfig.maxPeriodsPerTeacherPerWeek) {
+        maxWorkload = currentRequestData.teacherWorkloadConfig.maxPeriodsPerTeacherPerWeek;
+        console.log('Using maxPeriodsPerTeacherPerWeek from request:', maxWorkload);
+    } else {
+        console.warn('No teacherWorkloadConfig.maxPeriodsPerTeacherPerWeek found in request, using default:', maxWorkload);
+    }
+    
+    // Categorize teachers by subjects they teach
+    const teachersBySubject = categorizeTeachersBySubject(workloadSummary);
+    
+    let html = '';
+    
+    // Display each subject category
+    Object.entries(teachersBySubject).forEach(([subject, teachers]) => {
+        const subjectColorClass = getSubjectColorClass(subject);
         
         html += `
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="card-title mb-3">${teacher}</h6>
-                        <div class="workload-bar">
-                            <div class="workload-fill" style="width: ${percentage}%"></div>
-                            <div class="workload-text">${workload}/${maxWorkload}</div>
+            <div class="mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="legend-color ${subjectColorClass} me-2" style="width: 20px; height: 20px; border-radius: 4px;"></div>
+                    <h6 class="mb-0">${subject} Teachers</h6>
+                    <span class="badge bg-secondary ms-2">${teachers.length} teachers</span>
+                </div>
+                <div class="row">
+        `;
+        
+        teachers.forEach((teacher, index) => {
+            const workload = workloadSummary[teacher];
+            const percentage = Math.min((workload / maxWorkload) * 100, 100);
+            
+            // Determine workload status based on the actual maxWorkload from request
+            let workloadStatus;
+            let statusClass;
+            if (workload > maxWorkload) {
+                workloadStatus = 'Overloaded';
+                statusClass = 'text-danger';
+            } else if (workload > maxWorkload * 0.75) {
+                workloadStatus = 'Heavy Load';
+                statusClass = 'text-warning';
+            } else {
+                workloadStatus = 'Normal Load';
+                statusClass = 'text-success';
+            }
+            
+            html += `
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">${teacher}</h6>
+                            <div class="workload-bar">
+                                <div class="workload-fill" style="width: ${percentage}%"></div>
+                                <div class="workload-text">${workload}/${maxWorkload}</div>
+                            </div>
+                            <small class="${statusClass} mt-1 d-block">
+                                ${workloadStatus}
+                            </small>
                         </div>
-                        <small class="text-muted mt-1 d-block">
-                            ${workload > maxWorkload ? 'Overloaded' : workload > maxWorkload * 0.75 ? 'Heavy Load' : 'Normal Load'}
-                        </small>
                     </div>
+                </div>
+            `;
+        });
+        
+        html += `
                 </div>
             </div>
         `;
     });
     
-    html += '</div>';
+    // If there are teachers not assigned to any subject, show them separately
+    const assignedTeachers = new Set(Object.values(teachersBySubject).flat());
+    const unassignedTeachers = Object.keys(workloadSummary).filter(teacher => !assignedTeachers.has(teacher));
+    
+    if (unassignedTeachers.length > 0) {
+        html += `
+            <div class="mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="legend-color bg-secondary me-2" style="width: 20px; height: 20px; border-radius: 4px;"></div>
+                    <h6 class="mb-0">Other Teachers</h6>
+                    <span class="badge bg-secondary ms-2">${unassignedTeachers.length} teachers</span>
+                </div>
+                <div class="row">
+        `;
+        
+        unassignedTeachers.forEach(teacher => {
+            const workload = workloadSummary[teacher];
+            const percentage = Math.min((workload / maxWorkload) * 100, 100);
+            
+            let workloadStatus;
+            let statusClass;
+            if (workload > maxWorkload) {
+                workloadStatus = 'Overloaded';
+                statusClass = 'text-danger';
+            } else if (workload > maxWorkload * 0.75) {
+                workloadStatus = 'Heavy Load';
+                statusClass = 'text-warning';
+            } else {
+                workloadStatus = 'Normal Load';
+                statusClass = 'text-success';
+            }
+            
+            html += `
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">${teacher}</h6>
+                            <div class="workload-bar">
+                                <div class="workload-fill" style="width: ${percentage}%"></div>
+                                <div class="workload-text">${workload}/${maxWorkload}</div>
+                            </div>
+                            <small class="${statusClass} mt-1 d-block">
+                                ${workloadStatus}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
     container.innerHTML = html;
 }
+
+function categorizeTeachersBySubject(workloadSummary) {
+    const teachersBySubject = {};
+    
+    // Check if we have the original request data to categorize teachers
+    if (!currentRequestData || !currentRequestData.lessonAssignmentList) {
+        // If no request data, return all teachers under "All Teachers"
+        teachersBySubject['All Teachers'] = Object.keys(workloadSummary);
+        return teachersBySubject;
+    }
+    
+    // Map teachers to subjects based on the original request
+    currentRequestData.lessonAssignmentList.forEach(assignment => {
+        const subject = assignment.subject;
+        const possibleTeachers = assignment.possibleTeachers;
+        
+        if (!teachersBySubject[subject]) {
+            teachersBySubject[subject] = [];
+        }
+        
+        possibleTeachers.forEach(teacher => {
+            // Only add teachers that actually have workload (i.e., were assigned lessons)
+            if (workloadSummary[teacher] && workloadSummary[teacher] > 0) {
+                if (!teachersBySubject[subject].includes(teacher)) {
+                    teachersBySubject[subject].push(teacher);
+                }
+            }
+        });
+    });
+    
+    // Remove empty subject categories
+    Object.keys(teachersBySubject).forEach(subject => {
+        if (teachersBySubject[subject].length === 0) {
+            delete teachersBySubject[subject];
+        }
+    });
+    
+    // Sort teachers within each subject by workload (descending)
+    Object.keys(teachersBySubject).forEach(subject => {
+        teachersBySubject[subject].sort((a, b) => (workloadSummary[b] || 0) - (workloadSummary[a] || 0));
+    });
+    
+    return teachersBySubject;
+}
+
+// ...existing code...
 
 function displayUnassignedSummary(unassignedSummary) {
     const countDisplay = document.getElementById('unassignedCount');

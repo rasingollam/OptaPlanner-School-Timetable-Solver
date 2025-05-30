@@ -47,45 +47,80 @@
   ],
   "classList": [
     {
-      "grade": "12",
-      "classes": ["A", "B", "C", "D"]
+      "grade": "10",
+      "classes": ["A", "B", "C", "D","E", "F"]
     }
   ],
   "teacherWorkloadConfig": {
-    "totalTimeslotsPerWeek": 160,
+    "totalTimeslotsPerWeek": 240,
     "freePeriodsPerTeacherPerWeek": 10,
     "maxPeriodsPerTeacherPerWeek": 40
   },
   "subjectList": [
-    "Mathematics", "English", "Chemistry", "Physics"
+    "Mathematics", "English", "Sinhala", "Science", "History", "Dancing", "Commerce", "Designing Technology", "Buddhism"
   ],
   "lessonAssignmentList": [
     {
       "subject": "Mathematics",
-      "grade": "12",
-      "possibleTeachers": ["Tharindu Silva", "Malinda Perera", "Namal Udugama", "Sandun Balasuriya"],
-      "periodsPerWeek": 10,
+      "grade": "10",
+      "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal Udugama"],
+      "periodsPerWeek": 7,
       "maxPeriodsPerDay": 2
     },
     {
       "subject": "English",
-      "grade": "12",
-      "possibleTeachers": ["William Shakespeare", "Jane Austen", "Isuru Somarathne", "Janani Rathanapitiya"],
-      "periodsPerWeek": 10,
+      "grade": "10",
+      "possibleTeachers": ["William Shakespeare", "Jane Austen"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Sinhala",
+      "grade": "10",
+      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier"],
+      "periodsPerWeek": 7,
       "maxPeriodsPerDay": 2
     },
     {
-      "subject": "Chemistry",
-      "grade": "12",
-      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier","Denso Kobbakaduwa", "Nadun Rajakaruna"],
-      "periodsPerWeek": 10,
+      "subject": "Science",
+      "grade": "10",
+      "possibleTeachers": ["Albert Einstein", "Isaac Newton"],
+      "periodsPerWeek": 7,
       "maxPeriodsPerDay": 2
     },
     {
-      "subject": "Physics",
-      "grade": "12",
-      "possibleTeachers": ["Albert Einstein", "Isaac Newton","Darshana Ukuwela","Nimal Hettiarachchi"],
-      "periodsPerWeek": 10,
+      "subject": "History",
+      "grade": "10",
+      "possibleTeachers": ["Tharindu Silva", "Malinda Perera"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Dancing",
+      "grade": "10",
+      "possibleTeachers": ["William Shakespeare", "Jane Austen"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Commerce",
+      "grade": "10",
+      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Designing Technology",
+      "grade": "10",
+      "possibleTeachers": ["Albert Einstein", "Isaac Newton"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Buddhism",
+      "grade": "10",
+      "possibleTeachers": ["Albert Einstein", "Isaac Newton"],
+      "periodsPerWeek": 3,
       "maxPeriodsPerDay": 2
     }
   ]
