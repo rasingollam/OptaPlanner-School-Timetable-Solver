@@ -24,17 +24,17 @@
   "classList": [
     {
       "grade": "9th",
-      "classes": ["A", "B", "C", "D"]
+      "classes": ["A", "B", "C", "D", "E", "F", "G", "H"]
     },
     {
       "grade": "10th", 
-      "classes": ["A", "B", "C", "D"]
+      "classes": ["A", "B", "C", "D", "E", "F", "G", "H"]
     }
   ],
   "teacherWorkloadConfig": {
-    "totalTimeslotsPerWeek": 18,
+    "totalTimeslotsPerWeek": 30,
     "freePeriodsPerTeacherPerWeek": 5,
-    "maxPeriodsPerTeacherPerWeek": 13
+    "maxPeriodsPerTeacherPerWeek": 20
   },
   "subjectList": [
     "Math", "English", "Chemistry", "Physics", "Biology"
@@ -43,16 +43,16 @@
     {
       "subject": "Math",
       "grade": "9th",
-      "possibleTeachers": ["Tharindu Silva", "Malinda Perera"],
-      "periodsPerWeek": 6,
+      "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal","Komal"],
+      "periodsPerWeek": 7,
       "maxPeriodsPerDay": 2
     },
     {
       "subject": "English",
       "grade": "9th",
       "possibleTeachers": ["William Shakespeare", "Jane Austen"],
-      "periodsPerWeek": 4,
-      "maxPeriodsPerDay": 2
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
     },
     {
       "subject": "Chemistry",
@@ -78,15 +78,15 @@
     {
       "subject": "Math",
       "grade": "10th",
-      "possibleTeachers": ["Danul", "Kasun", "Nimal"],
-      "periodsPerWeek": 6,
+      "possibleTeachers": ["Danul", "Kasun", "Nimal","Safeet","Binura"],
+      "periodsPerWeek": 8,
       "maxPeriodsPerDay": 2
     },
     {
       "subject": "English",
       "grade": "10th",
-      "possibleTeachers": ["William Shakespeare", "Jane Austen","Rashika Ramachandran"],
-      "periodsPerWeek": 4,
+      "possibleTeachers": ["Navindu", "Anuththara","Rashika Ramachandran"],
+      "periodsPerWeek": 5,
       "maxPeriodsPerDay": 2
     }
   ]

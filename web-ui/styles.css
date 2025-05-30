@@ -1,0 +1,166 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.timetable-grid {
+    overflow-x: auto;
+}
+
+.timetable-table {
+    min-width: 800px;
+}
+
+.timetable-table th {
+    background-color: #495057;
+    color: white;
+    text-align: center;
+    font-weight: 600;
+    padding: 12px 8px;
+    border: 1px solid #dee2e6;
+}
+
+.timetable-table td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 8px;
+    border: 1px solid #dee2e6;
+    height: 80px;
+    position: relative;
+}
+
+.time-slot {
+    font-weight: 600;
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.lesson-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 2px;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.lesson-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.subject-math { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.subject-english { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.subject-chemistry { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.subject-physics { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.subject-biology { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+.teacher-name {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    margin-top: 2px;
+}
+
+.subject-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.time-display {
+    font-size: 0.7rem;
+    opacity: 0.8;
+}
+
+.workload-bar {
+    height: 20px;
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.workload-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745 0%, #ffc107 70%, #dc3545 100%);
+    transition: width 0.3s ease;
+}
+
+.workload-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+.score-good { color: #28a745; }
+.score-warning { color: #ffc107; }
+.score-danger { color: #dc3545; }
+
+.empty-slot {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.day-header {
+    background-color: #343a40 !important;
+    color: white !important;
+    font-weight: 700;
+}
+
+#jsonInput {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.alert-custom {
+    border-radius: 8px;
+    border: none;
+}
+
+.btn-custom {
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.class-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px 8px 0 0;
+    padding: 15px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.spinner-border-custom {
+    width: 3rem;
+    height: 3rem;
+}
+
+@media (max-width: 768px) {
+    .timetable-table {
+        font-size: 0.8rem;
+    }
+    
+    .lesson-card {
+        padding: 4px;
+        font-size: 0.75rem;
+    }
+    
+    .timetable-table td {
+        height: 60px;
+        padding: 4px;
+    }
+}
