@@ -360,6 +360,157 @@ function generateTimetableHTML(className, weekSchedule, subjects) {
     });
     
     html += '</tbody></table></div>';
+    
+    // Add class summary table
+    html += generateClassSummaryTable(className, weekSchedule);
+    
+    return html;
+}
+
+function generateClassSummaryTable(className, weekSchedule) {
+    // Count assigned periods per subject for this class
+    const assignedPeriods = {};
+    
+    // Count periods from the actual schedule
+    Object.values(weekSchedule).forEach(daySchedule => {
+        Object.values(daySchedule).forEach(lesson => {
+            if (lesson && lesson.subject) {
+                assignedPeriods[lesson.subject] = (assignedPeriods[lesson.subject] || 0) + 1;
+            }
+        });
+    });
+    
+    // Get expected periods from original request data
+    const expectedPeriods = {};
+    
+    if (currentRequestData && currentRequestData.lessonAssignmentList) {
+        // Extract grade from className (e.g., "10A" -> grade "10")
+        const grade = className.replace(/[A-Z]/g, '');
+        
+        currentRequestData.lessonAssignmentList.forEach(assignment => {
+            if (assignment.grade === grade) {
+                expectedPeriods[assignment.subject] = assignment.periodsPerWeek;
+            }
+        });
+    }
+    
+    // Get all subjects (both assigned and expected)
+    const allSubjects = new Set([
+        ...Object.keys(assignedPeriods),
+        ...Object.keys(expectedPeriods)
+    ]);
+    
+    if (allSubjects.size === 0) {
+        return '<div class="mt-3"><p class="text-muted">No subject data available for summary.</p></div>';
+    }
+    
+    let html = `
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Class ${className} - Subject Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Subject</th>
+                                    <th class="text-center">Periods Needed</th>
+                                    <th class="text-center">Assigned Periods</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+    `;
+    
+    // Sort subjects alphabetically
+    Array.from(allSubjects).sort().forEach(subject => {
+        const needed = expectedPeriods[subject] || 0;
+        const assigned = assignedPeriods[subject] || 0;
+        const subjectColorClass = getSubjectColorClass(subject);
+        
+        // Determine status
+        let statusBadge;
+        let statusClass;
+        
+        if (assigned === needed && needed > 0) {
+            statusBadge = 'Complete';
+            statusClass = 'bg-success';
+        } else if (assigned > needed) {
+            statusBadge = 'Over-assigned';
+            statusClass = 'bg-info';
+        } else if (needed === 0) {
+            statusBadge = 'Not Required';
+            statusClass = 'bg-secondary';
+        } else {
+            statusBadge = 'Incomplete';
+            statusClass = 'bg-warning';
+        }
+        
+        html += `
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="legend-color ${subjectColorClass} me-2" style="width: 16px; height: 16px; border-radius: 3px;"></div>
+                        <strong>${subject}</strong>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-secondary">${needed}</span>
+                </td>
+                <td class="text-center">
+                    <span class="badge ${assigned === needed ? 'bg-success' : assigned > needed ? 'bg-info' : 'bg-primary'}">${assigned}</span>
+                </td>
+                <td class="text-center">
+                    <span class="badge ${statusClass}">${statusBadge}</span>
+                </td>
+            </tr>
+        `;
+    });
+    
+    // Add totals row
+    const totalNeeded = Object.values(expectedPeriods).reduce((sum, val) => sum + val, 0);
+    const totalAssigned = Object.values(assignedPeriods).reduce((sum, val) => sum + val, 0);
+    
+    html += `
+                <tr class="table-secondary fw-bold">
+                    <td><strong>TOTAL</strong></td>
+                    <td class="text-center"><span class="badge bg-dark">${totalNeeded}</span></td>
+                    <td class="text-center"><span class="badge bg-dark">${totalAssigned}</span></td>
+                    <td class="text-center">
+                        <span class="badge ${totalAssigned === totalNeeded ? 'bg-success' : 'bg-warning'}">
+                            ${totalAssigned === totalNeeded ? 'Complete' : 'Incomplete'}
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    `;
+    
+    // Add completion percentage
+    const completionPercentage = totalNeeded > 0 ? Math.round((totalAssigned / totalNeeded) * 100) : 100;
+    
+    html += `
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">Schedule Completion</small>
+                            <small class="fw-bold">${completionPercentage}%</small>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar ${completionPercentage === 100 ? 'bg-success' : completionPercentage >= 75 ? 'bg-info' : 'bg-warning'}" 
+                                 style="width: ${completionPercentage}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
     return html;
 }
 
@@ -600,9 +751,25 @@ function calculateAffectedClasses(unassignedPeriods) {
 function displayDetailedUnassignedPeriods(data) {
     const container = document.getElementById('teacherWorkload');
     
+    // Debug: Check what data we're receiving
+    console.log('=== Unassigned Periods Debug ===');
+    console.log('Full data object:', data);
+    console.log('unassignedSummary:', data.unassignedSummary);
+    console.log('unassignedPeriods:', data.unassignedPeriods);
+    console.log('detailedUnassignedPeriods:', data.detailedUnassignedPeriods);
+    
     // Check for unassigned data in multiple possible locations
-    const hasUnassignedData = (data.unassignedSummary && data.unassignedSummary.totalUnassignedPeriods > 0) ||
-                             (data.unassignedPeriods && Object.keys(data.unassignedPeriods).length > 0);
+    const hasUnassignedSummary = data.unassignedSummary && data.unassignedSummary.totalUnassignedPeriods > 0;
+    const hasUnassignedPeriods = data.unassignedPeriods && Object.keys(data.unassignedPeriods).length > 0;
+    const hasDetailedUnassigned = data.detailedUnassignedPeriods && Object.keys(data.detailedUnassignedPeriods).length > 0;
+    
+    console.log('hasUnassignedSummary:', hasUnassignedSummary);
+    console.log('hasUnassignedPeriods:', hasUnassignedPeriods);
+    console.log('hasDetailedUnassigned:', hasDetailedUnassigned);
+    
+    const hasUnassignedData = hasUnassignedSummary || hasUnassignedPeriods || hasDetailedUnassigned;
+    
+    console.log('Final hasUnassignedData:', hasUnassignedData);
     
     if (hasUnassignedData) {
         const unassignedSection = `
@@ -626,14 +793,49 @@ function displayDetailedUnassignedPeriods(data) {
         
         // Append unassigned section
         container.innerHTML = existingHTML + unassignedSection;
+    } else {
+        console.log('No unassigned data found - section will not be displayed');
+        
+        // Add a debug section to show what we received
+        const debugSection = `
+            <div class="mt-4">
+                <div class="card border-info">
+                    <div class="card-header bg-info bg-opacity-10">
+                        <h6 class="mb-0 text-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Debug: Unassigned Data Check
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Data received:</strong></p>
+                        <ul>
+                            <li>unassignedSummary: ${data.unassignedSummary ? JSON.stringify(data.unassignedSummary) : 'null'}</li>
+                            <li>unassignedPeriods: ${data.unassignedPeriods ? JSON.stringify(data.unassignedPeriods) : 'null'}</li>
+                            <li>detailedUnassignedPeriods: ${data.detailedUnassignedPeriods ? JSON.stringify(data.detailedUnassignedPeriods) : 'null'}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Get existing teacher workload HTML
+        const existingHTML = container.innerHTML;
+        
+        // Append debug section
+        container.innerHTML = existingHTML + debugSection;
     }
 }
 
 function generateUnassignedPeriodsHTML(data) {
+    console.log('=== generateUnassignedPeriodsHTML Debug ===');
+    
     // Use the actual data structure from backend
     const unassignedPeriods = data.unassignedPeriods || {};
     const detailedUnassignedPeriods = data.detailedUnassignedPeriods || {};
     const unassignedSummary = data.unassignedSummary;
+    
+    console.log('Processing unassignedPeriods:', unassignedPeriods);
+    console.log('Processing detailedUnassignedPeriods:', detailedUnassignedPeriods);
     
     // Calculate totals from actual data
     const totalUnassignedPeriods = calculateTotalUnassignedFromData(unassignedPeriods);
@@ -645,6 +847,12 @@ function generateUnassignedPeriodsHTML(data) {
         Object.values(gradeData).forEach(subjectData => {
             totalAffectedClasses += Object.keys(subjectData).length;
         });
+    });
+    
+    console.log('Calculated totals:', {
+        totalUnassignedPeriods,
+        totalGrades,
+        totalAffectedClasses
     });
     
     let html = `
@@ -706,6 +914,13 @@ function generateUnassignedPeriodsHTML(data) {
         });
         
         html += '</div>';
+    } else {
+        html += `
+            <div class="alert alert-info">
+                <h6><i class="fas fa-info-circle me-2"></i>No Unassigned Periods</h6>
+                <p class="mb-0">All requested periods have been successfully assigned to the timetable.</p>
+            </div>
+        `;
     }
 
     return html;

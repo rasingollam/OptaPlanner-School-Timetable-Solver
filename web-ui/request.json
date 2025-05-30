@@ -68,7 +68,7 @@
       "subject": "Mathematics",
       "grade": "10",
       "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal Udugama"],
-      "periodsPerWeek": 7,
+      "periodsPerWeek": 6,
       "maxPeriodsPerDay": 2
     },
     {
@@ -82,14 +82,14 @@
       "subject": "Sinhala",
       "grade": "10",
       "possibleTeachers": ["Marie Curie", "Antoine Lavoisier", "Galileo Galilei"],
-      "periodsPerWeek": 7,
+      "periodsPerWeek": 6,
       "maxPeriodsPerDay": 2
     },
     {
       "subject": "Science",
       "grade": "10",
       "possibleTeachers": ["Albert Einstein", "Isaac Newton", "Robert Oppenheimer"],
-      "periodsPerWeek": 7,
+      "periodsPerWeek": 6,
       "maxPeriodsPerDay": 2
     },
     {
@@ -131,7 +131,7 @@
       "subject": "Mathematics",
       "grade": "11",
       "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal Udugama"],
-      "periodsPerWeek": 7,
+      "periodsPerWeek": 6,
       "maxPeriodsPerDay": 2
     },
     {
@@ -145,14 +145,14 @@
       "subject": "Sinhala",
       "grade": "11",
       "possibleTeachers": ["Marie Curie", "Antoine Lavoisier", "Galileo Galilei"],
-      "periodsPerWeek": 7,
+      "periodsPerWeek": 6,
       "maxPeriodsPerDay": 2
     },
     {
       "subject": "Science",
       "grade": "11",
       "possibleTeachers": ["Albert Einstein", "Isaac Newton", "Robert Oppenheimer"],
-      "periodsPerWeek": 7,
+      "periodsPerWeek": 6,
       "maxPeriodsPerDay": 2
     },
     {
