@@ -46,13 +46,13 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .groupBy(Lesson::getStudentGroup, Lesson::getSubject, 
                         lesson -> lesson.getTimeslot().getDayOfWeek(), count())
                 .filter((studentGroup, subject, dayOfWeek, lessonCount) -> {
-                    // Get maxPeriodsPerDay based on subject - this should be configurable
-                    int maxPeriodsPerDay = getMaxPeriodsPerDay(subject);
+                    // Get maxPeriodsPerDay from the lesson's maxPeriodsPerDay field
+                    int maxPeriodsPerDay = getMaxPeriodsPerDay(subject, studentGroup.getGrade());
                     return lessonCount > maxPeriodsPerDay;
                 })
                 .penalize(HardSoftScore.ONE_HARD,
                         (studentGroup, subject, dayOfWeek, lessonCount) -> {
-                            int maxPeriodsPerDay = getMaxPeriodsPerDay(subject);
+                            int maxPeriodsPerDay = getMaxPeriodsPerDay(subject, studentGroup.getGrade());
                             return lessonCount - maxPeriodsPerDay;
                         })
                 .asConstraint("Max periods per day per subject");
@@ -62,18 +62,27 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
         return constraintFactory
                 .forEach(Lesson.class)
                 .groupBy(Lesson::getTeacher, count())
-                .filter((teacher, lessonCount) -> lessonCount > 13) // Use maxPeriodsPerTeacherPerWeek from config
+                .filter((teacher, lessonCount) -> {
+                    // Get dynamic workload limit from the TimeTable's configuration
+                    int maxPeriodsPerTeacher = getMaxPeriodsPerTeacher();
+                    return lessonCount > maxPeriodsPerTeacher;
+                })
                 .penalize(HardSoftScore.ONE_HARD, 
-                        (teacher, lessonCount) -> lessonCount - 13)
+                        (teacher, lessonCount) -> {
+                            int maxPeriodsPerTeacher = getMaxPeriodsPerTeacher();
+                            return lessonCount - maxPeriodsPerTeacher;
+                        })
                 .asConstraint("Teacher workload limit");
     }
 
-    private int getMaxPeriodsPerDay(String subject) {
-        // This should be made configurable based on the request
-        switch (subject.toLowerCase()) {
-            case "math": return 2;
-            case "english": return 2;
-            default: return 1;
-        }
+    private int getMaxPeriodsPerDay(String subject, String grade) {
+        // Get the configuration from the TimeTable's constraint configuration
+        // This should be injected from the request configuration
+        return TimeTableConstraintConfig.getMaxPeriodsPerDay(subject, grade);
+    }
+    
+    private int getMaxPeriodsPerTeacher() {
+        // Get the configuration from the TimeTable's constraint configuration
+        return TimeTableConstraintConfig.getMaxPeriodsPerTeacher();
     }
 }

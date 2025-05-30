@@ -32,25 +32,47 @@ const FALLBACK_CONFIG = {
         {"id": 4, "dayOfWeek": "MONDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
         {"id": 5, "dayOfWeek": "MONDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
         {"id": 6, "dayOfWeek": "MONDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
-        {"id": 7, "dayOfWeek": "TUESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
-        {"id": 8, "dayOfWeek": "TUESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
-        {"id": 9, "dayOfWeek": "TUESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
-        {"id": 10, "dayOfWeek": "TUESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
-        {"id": 11, "dayOfWeek": "TUESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
-        {"id": 12, "dayOfWeek": "TUESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
-        {"id": 13, "dayOfWeek": "WEDNESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
-        {"id": 14, "dayOfWeek": "WEDNESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
-        {"id": 15, "dayOfWeek": "WEDNESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
-        {"id": 16, "dayOfWeek": "WEDNESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
-        {"id": 17, "dayOfWeek": "WEDNESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
-        {"id": 18, "dayOfWeek": "WEDNESDAY", "startTime": "11:30:00", "endTime": "12:10:00"}
+        {"id": 7, "dayOfWeek": "MONDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+        {"id": 8, "dayOfWeek": "MONDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+        {"id": 9, "dayOfWeek": "TUESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+        {"id": 10, "dayOfWeek": "TUESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+        {"id": 11, "dayOfWeek": "TUESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+        {"id": 12, "dayOfWeek": "TUESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+        {"id": 13, "dayOfWeek": "TUESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+        {"id": 14, "dayOfWeek": "TUESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+        {"id": 15, "dayOfWeek": "TUESDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+        {"id": 16, "dayOfWeek": "TUESDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+        {"id": 17, "dayOfWeek": "WEDNESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+        {"id": 18, "dayOfWeek": "WEDNESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+        {"id": 19, "dayOfWeek": "WEDNESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+        {"id": 20, "dayOfWeek": "WEDNESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+        {"id": 21, "dayOfWeek": "WEDNESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+        {"id": 22, "dayOfWeek": "WEDNESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+        {"id": 23, "dayOfWeek": "WEDNESDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+        {"id": 24, "dayOfWeek": "WEDNESDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+        {"id": 25, "dayOfWeek": "THURSDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+        {"id": 26, "dayOfWeek": "THURSDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+        {"id": 27, "dayOfWeek": "THURSDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+        {"id": 28, "dayOfWeek": "THURSDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+        {"id": 29, "dayOfWeek": "THURSDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+        {"id": 30, "dayOfWeek": "THURSDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+        {"id": 31, "dayOfWeek": "THURSDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+        {"id": 32, "dayOfWeek": "THURSDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+        {"id": 33, "dayOfWeek": "FRIDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+        {"id": 34, "dayOfWeek": "FRIDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+        {"id": 35, "dayOfWeek": "FRIDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+        {"id": 36, "dayOfWeek": "FRIDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+        {"id": 37, "dayOfWeek": "FRIDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+        {"id": 38, "dayOfWeek": "FRIDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+        {"id": 39, "dayOfWeek": "FRIDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+        {"id": 40, "dayOfWeek": "FRIDAY", "startTime": "12:50:00", "endTime": "13:30:00"}
     ],
     "classList": [
         {"grade": "9th", "classes": ["A", "B", "C", "D", "E", "F", "G", "H"]},
         {"grade": "10th", "classes": ["A", "B", "C", "D", "E", "F", "G", "H"]}
     ],
     "teacherWorkloadConfig": {
-        "totalTimeslotsPerWeek": 30,
+        "totalTimeslotsPerWeek": 40,
         "freePeriodsPerTeacherPerWeek": 5,
         "maxPeriodsPerTeacherPerWeek": 20
     },
@@ -295,8 +317,11 @@ function displayResults(data) {
     // Display teacher workload
     displayTeacherWorkload(data.teacherWorkloadSummary);
     
-    // Display unassigned summary
+    // Display unassigned summary (enhanced)
     displayUnassignedSummary(data.unassignedSummary);
+    
+    // Display detailed unassigned periods information
+    displayDetailedUnassignedPeriods(data);
 }
 
 function extractSubjectsFromResponse(data) {
@@ -331,21 +356,6 @@ function displayScore(data) {
     } else {
         scoreDisplay.className = 'h3 score-danger';
         feasibilityBadge.innerHTML = '<span class="badge bg-danger">Not Feasible</span>';
-    }
-}
-
-function displayUnassignedSummary(unassignedSummary) {
-    const countDisplay = document.getElementById('unassignedCount');
-    const messageDisplay = document.getElementById('unassignedMessage');
-    
-    countDisplay.textContent = unassignedSummary?.totalUnassignedPeriods || 0;
-    
-    if (unassignedSummary?.totalUnassignedPeriods > 0) {
-        countDisplay.className = 'h3 score-warning';
-        messageDisplay.textContent = `${unassignedSummary.totalUnassignedClasses} classes affected`;
-    } else {
-        countDisplay.className = 'h3 score-good';
-        messageDisplay.textContent = 'All periods assigned successfully';
     }
 }
 
@@ -384,8 +394,8 @@ function displayTimetable() {
 
 function generateTimetableHTML(className, weekSchedule, subjects) {
     // Use dynamic days and time slots if available, otherwise fall back to defaults
-    const days = availableDays.length > 0 ? availableDays : ['MONDAY', 'TUESDAY', 'WEDNESDAY'];
-    const timeSlots = availableTimeSlots.length > 0 ? availableTimeSlots : ['07:50:00', '08:30:00', '09:10:00', '09:50:00', '10:50:00', '11:30:00'];
+    const days = availableDays.length > 0 ? availableDays : ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
+    const timeSlots = availableTimeSlots.length > 0 ? availableTimeSlots : ['07:50:00', '08:30:00', '09:10:00', '09:50:00', '10:50:00', '11:30:00', '12:10:00', '12:50:00'];
     
     let html = `
         <div class="class-header">
@@ -485,6 +495,14 @@ function displayTeacherWorkload(workloadSummary) {
     container.innerHTML = html;
 }
 
+// Add toggle functionality for detailed view
+function toggleUnassignedDetails() {
+    const detailsSection = document.getElementById('unassignedDetails');
+    if (detailsSection) {
+        detailsSection.classList.toggle('d-none');
+    }
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're running from file:// protocol
@@ -515,3 +533,241 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+function displayUnassignedSummary(unassignedSummary) {
+    const countDisplay = document.getElementById('unassignedCount');
+    const messageDisplay = document.getElementById('unassignedMessage');
+    
+    // Handle both possible field names from backend
+    const totalUnassigned = unassignedSummary?.totalUnassignedPeriods || 
+                           calculateTotalUnassignedFromData(currentTimetableData?.unassignedPeriods) || 0;
+    
+    countDisplay.textContent = totalUnassigned;
+    
+    if (totalUnassigned > 0) {
+        countDisplay.className = 'h3 score-warning';
+        
+        // Calculate affected classes from unassignedPeriods data
+        const affectedClasses = calculateAffectedClasses(currentTimetableData?.unassignedPeriods);
+        
+        messageDisplay.innerHTML = `
+            ${affectedClasses} classes affected
+            <br><small class="text-info">
+                <i class="fas fa-info-circle me-1"></i>
+                View details below for breakdown
+            </small>
+        `;
+    } else {
+        countDisplay.className = 'h3 score-good';
+        messageDisplay.textContent = 'All periods assigned successfully';
+    }
+}
+
+function calculateTotalUnassignedFromData(unassignedPeriods) {
+    if (!unassignedPeriods) return 0;
+    
+    let total = 0;
+    Object.values(unassignedPeriods).forEach(gradeData => {
+        Object.values(gradeData).forEach(periods => {
+            total += periods;
+        });
+    });
+    return total;
+}
+
+function calculateAffectedClasses(unassignedPeriods) {
+    if (!unassignedPeriods) return 0;
+    
+    // This is a simplified calculation - ideally we'd get this from detailedUnassignedPeriods
+    return Object.keys(unassignedPeriods).length;
+}
+
+function displayDetailedUnassignedPeriods(data) {
+    const container = document.getElementById('teacherWorkload');
+    
+    // Check for unassigned data in multiple possible locations
+    const hasUnassignedData = (data.unassignedSummary && data.unassignedSummary.totalUnassignedPeriods > 0) ||
+                             (data.unassignedPeriods && Object.keys(data.unassignedPeriods).length > 0);
+    
+    if (hasUnassignedData) {
+        const unassignedSection = `
+            <div class="mt-4">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning bg-opacity-10">
+                        <h6 class="mb-0 text-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Unassigned Periods Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        ${generateUnassignedPeriodsHTML(data)}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Get existing teacher workload HTML
+        const existingHTML = container.innerHTML;
+        
+        // Append unassigned section
+        container.innerHTML = existingHTML + unassignedSection;
+    }
+}
+
+function generateUnassignedPeriodsHTML(data) {
+    // Use the actual data structure from backend
+    const unassignedPeriods = data.unassignedPeriods || {};
+    const detailedUnassignedPeriods = data.detailedUnassignedPeriods || {};
+    const unassignedSummary = data.unassignedSummary;
+    
+    // Calculate totals from actual data
+    const totalUnassignedPeriods = calculateTotalUnassignedFromData(unassignedPeriods);
+    const totalGrades = Object.keys(unassignedPeriods).length;
+    
+    // Calculate total affected classes from detailed data
+    let totalAffectedClasses = 0;
+    Object.values(detailedUnassignedPeriods).forEach(gradeData => {
+        Object.values(gradeData).forEach(subjectData => {
+            totalAffectedClasses += Object.keys(subjectData).length;
+        });
+    });
+    
+    let html = `
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="h4 text-warning">${totalUnassignedPeriods}</div>
+                    <small class="text-muted">Total Unassigned Periods</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="h4 text-info">${totalAffectedClasses}</div>
+                    <small class="text-muted">Classes Affected</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="h4 text-secondary">${totalGrades}</div>
+                    <small class="text-muted">Grades Affected</small>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (Object.keys(unassignedPeriods).length > 0) {
+        html += '<div class="accordion" id="unassignedAccordion">';
+        
+        Object.entries(unassignedPeriods).forEach(([grade, gradeSubjects], index) => {
+            const collapseId = `collapse-${grade}`;
+            const isFirstItem = index === 0;
+            
+            // Calculate grade totals
+            const gradeTotal = Object.values(gradeSubjects).reduce((sum, periods) => sum + periods, 0);
+            const gradeAffectedClasses = detailedUnassignedPeriods[grade] ? 
+                Object.values(detailedUnassignedPeriods[grade]).reduce((sum, subjectData) => 
+                    sum + Object.keys(subjectData).length, 0) : 0;
+            
+            html += `
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button ${isFirstItem ? '' : 'collapsed'}" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+                            <strong>Grade ${grade}</strong>
+                            <span class="ms-auto me-3">
+                                <span class="badge bg-warning">${gradeTotal} periods</span>
+                                <span class="badge bg-info">${gradeAffectedClasses} classes</span>
+                            </span>
+                        </button>
+                    </h2>
+                    <div id="${collapseId}" class="accordion-collapse collapse ${isFirstItem ? 'show' : ''}" 
+                         data-bs-parent="#unassignedAccordion">
+                        <div class="accordion-body">
+                            ${generateGradeBreakdownHTMLFromBackendData(grade, gradeSubjects, detailedUnassignedPeriods[grade] || {})}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+    }
+
+    return html;
+}
+
+function generateGradeBreakdownHTMLFromBackendData(grade, gradeSubjects, detailedGradeData) {
+    let html = '';
+    
+    Object.entries(gradeSubjects).forEach(([subject, totalPeriods]) => {
+        const subjectColorClass = getSubjectColorClass(subject);
+        const subjectDetailedData = detailedGradeData[subject] || {};
+        const affectedClasses = Object.keys(subjectDetailedData);
+        
+        html += `
+            <div class="card mb-3 border-start border-4" style="border-left-color: var(--bs-warning) !important;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="legend-color ${subjectColorClass} me-2" style="width: 20px; height: 20px; border-radius: 4px;"></div>
+                                <strong>${subject}</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Unassigned Periods:</small><br>
+                            <span class="badge bg-secondary">${totalPeriods}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Classes Affected:</small><br>
+                            <span class="badge bg-warning">${affectedClasses.length}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Reason:</small><br>
+                            <span class="text-danger small">Teacher capacity limit reached</span>
+                        </div>
+                    </div>
+                    
+                    ${generateClassLevelBreakdownFromBackendData(grade, subject, subjectDetailedData)}
+                </div>
+            </div>
+        `;
+    });
+    
+    return html;
+}
+
+function generateClassLevelBreakdownFromBackendData(grade, subject, subjectDetailedData) {
+    if (!subjectDetailedData || Object.keys(subjectDetailedData).length === 0) {
+        return '';
+    }
+    
+    let html = `
+        <div class="mt-3">
+            <h6 class="text-muted mb-2">
+                <i class="fas fa-users me-1"></i>
+                Affected Classes Detail:
+            </h6>
+            <div class="row">
+    `;
+    
+    Object.entries(subjectDetailedData).forEach(([className, unassignedCount]) => {
+        const fullClassName = `${grade}${className}`;
+        
+        html += `
+            <div class="col-md-3 mb-2">
+                <div class="card card-body py-2 text-center bg-light">
+                    <div class="fw-bold">${fullClassName}</div>
+                    <small class="text-danger">${unassignedCount} periods unassigned</small>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    return html;
+}

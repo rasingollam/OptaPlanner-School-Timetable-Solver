@@ -6,35 +6,55 @@
     {"id": 4, "dayOfWeek": "MONDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
     {"id": 5, "dayOfWeek": "MONDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
     {"id": 6, "dayOfWeek": "MONDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 7, "dayOfWeek": "MONDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 8, "dayOfWeek": "MONDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
 
-    {"id": 7, "dayOfWeek": "TUESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
-    {"id": 8, "dayOfWeek": "TUESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
-    {"id": 9, "dayOfWeek": "TUESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
-    {"id": 10, "dayOfWeek": "TUESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
-    {"id": 11, "dayOfWeek": "TUESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
-    {"id": 12, "dayOfWeek": "TUESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 9, "dayOfWeek": "TUESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 10, "dayOfWeek": "TUESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 11, "dayOfWeek": "TUESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 12, "dayOfWeek": "TUESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 13, "dayOfWeek": "TUESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 14, "dayOfWeek": "TUESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 15, "dayOfWeek": "TUESDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 16, "dayOfWeek": "TUESDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
 
-    {"id": 13, "dayOfWeek": "WEDNESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
-    {"id": 14, "dayOfWeek": "WEDNESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
-    {"id": 15, "dayOfWeek": "WEDNESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
-    {"id": 16, "dayOfWeek": "WEDNESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
-    {"id": 17, "dayOfWeek": "WEDNESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
-    {"id": 18, "dayOfWeek": "WEDNESDAY", "startTime": "11:30:00", "endTime": "12:10:00"}
+    {"id": 17, "dayOfWeek": "WEDNESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 18, "dayOfWeek": "WEDNESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 19, "dayOfWeek": "WEDNESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 20, "dayOfWeek": "WEDNESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 21, "dayOfWeek": "WEDNESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 22, "dayOfWeek": "WEDNESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 23, "dayOfWeek": "WEDNESDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 24, "dayOfWeek": "WEDNESDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+
+    {"id": 25, "dayOfWeek": "THURSDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 26, "dayOfWeek": "THURSDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 27, "dayOfWeek": "THURSDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 28, "dayOfWeek": "THURSDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 29, "dayOfWeek": "THURSDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 30, "dayOfWeek": "THURSDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 31, "dayOfWeek": "THURSDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 32, "dayOfWeek": "THURSDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+
+    {"id": 33, "dayOfWeek": "FRIDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 34, "dayOfWeek": "FRIDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 35, "dayOfWeek": "FRIDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 36, "dayOfWeek": "FRIDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 37, "dayOfWeek": "FRIDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 38, "dayOfWeek": "FRIDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 39, "dayOfWeek": "FRIDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 40, "dayOfWeek": "FRIDAY", "startTime": "12:50:00", "endTime": "13:30:00"}
   ],
   "classList": [
     {
       "grade": "9th",
       "classes": ["A", "B", "C", "D", "E", "F", "G", "H"]
-    },
-    {
-      "grade": "10th", 
-      "classes": ["A", "B", "C", "D", "E", "F", "G", "H"]
     }
   ],
   "teacherWorkloadConfig": {
-    "totalTimeslotsPerWeek": 30,
+    "totalTimeslotsPerWeek": 20,
     "freePeriodsPerTeacherPerWeek": 5,
-    "maxPeriodsPerTeacherPerWeek": 20
+    "maxPeriodsPerTeacherPerWeek": 13
   },
   "subjectList": [
     "Math", "English", "Chemistry", "Physics", "Biology"
@@ -74,20 +94,6 @@
       "possibleTeachers": ["Charles Darwin", "Gregor Mendel"],
       "periodsPerWeek": 2,
       "maxPeriodsPerDay": 1
-    },
-    {
-      "subject": "Math",
-      "grade": "10th",
-      "possibleTeachers": ["Danul", "Kasun", "Nimal","Safeet","Binura"],
-      "periodsPerWeek": 8,
-      "maxPeriodsPerDay": 2
-    },
-    {
-      "subject": "English",
-      "grade": "10th",
-      "possibleTeachers": ["Navindu", "Anuththara","Rashika Ramachandran"],
-      "periodsPerWeek": 5,
-      "maxPeriodsPerDay": 2
     }
   ]
 }

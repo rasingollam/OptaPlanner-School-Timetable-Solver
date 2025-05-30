@@ -2,6 +2,7 @@ package com.school.timetabling.service;
 
 import com.school.timetabling.domain.*;
 import com.school.timetabling.rest.dto.TimetableRequest;
+import com.school.timetabling.solver.TimeTableConstraintConfig;
 import org.optaplanner.core.api.solver.SolverJob;
 import org.optaplanner.core.api.solver.SolverManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,20 @@ public class TimeTableService {
     private Map<String, Map<String, Map<String, Integer>>> detailedUnassignedPeriods = new HashMap<>();
 
     public TimeTable solve(TimetableRequest request) throws ExecutionException, InterruptedException {
+        // Configure constraints with values from request
+        configureConstraints(request);
+        
         TimeTable problem = convertRequestToProblem(request);
         
         UUID problemId = UUID.randomUUID();
         SolverJob<TimeTable, UUID> solverJob = solverManager.solve(problemId, problem);
         
-        return solverJob.getFinalBestSolution();
+        TimeTable solution = solverJob.getFinalBestSolution();
+        
+        // Clean up constraint configuration
+        TimeTableConstraintConfig.clearConfiguration();
+        
+        return solution;
     }
 
     public Map<String, Map<String, Integer>> getUnassignedPeriods() {
@@ -167,5 +176,22 @@ public class TimeTableService {
         }
 
         return new TimeTable(timeslots, studentGroups, lessons);
+    }
+
+    private void configureConstraints(TimetableRequest request) {
+        // Build maxPeriodsPerDay configuration from request
+        Map<String, Map<String, Integer>> maxPeriodsConfig = new HashMap<>();
+        
+        for (TimetableRequest.LessonAssignment assignment : request.getLessonAssignmentList()) {
+            maxPeriodsConfig.computeIfAbsent(assignment.getSubject(), k -> new HashMap<>())
+                           .put(assignment.getGrade(), assignment.getMaxPeriodsPerDay());
+        }
+        
+        // Get teacher workload limit
+        int maxPeriodsPerTeacher = request.getTeacherWorkloadConfig() != null ? 
+            request.getTeacherWorkloadConfig().getMaxPeriodsPerTeacherPerWeek() : 13;
+        
+        // Set the configuration for the constraint provider
+        TimeTableConstraintConfig.setConfiguration(maxPeriodsConfig, maxPeriodsPerTeacher);
     }
 }
