@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
+// import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/timetable")
@@ -28,8 +29,10 @@ public class TimetableController {
     public ResponseEntity<TimetableResponse> solveTimetable(@RequestBody TimetableRequest request) {
         try {
             TimeTable solution = timeTableService.solve(request);
-            Map<String, Map<String, Integer>> unassignedPeriods = timeTableService.getUnassignedPeriods();
-            Map<String, Map<String, Map<String, Integer>>> detailedUnassignedPeriods = timeTableService.getDetailedUnassignedPeriods();
+            
+            // Calculate unassigned periods from the solution (not from service)
+            Map<String, Map<String, Integer>> unassignedPeriods = calculateUnassignedPeriods(solution, request);
+            Map<String, Map<String, Map<String, Integer>>> detailedUnassignedPeriods = calculateDetailedUnassignedPeriods(solution);
 
             // Convert to response format
             TimetableResponse response = convertToResponse(solution);
@@ -170,10 +173,20 @@ public class TimetableController {
     private Map<String, Integer> calculateTeacherWorkload(TimeTable solution) {
         Map<String, Integer> workload = new HashMap<>();
         for (Lesson lesson : solution.getLessonList()) {
-            if (lesson.getTimeslot() != null) {
+            if (lesson.getTimeslot() != null && lesson.getTeacher() != null) {
                 workload.merge(lesson.getTeacher(), 1, Integer::sum);
             }
         }
         return workload;
+    }
+
+    private Map<String, Map<String, Integer>> calculateUnassignedPeriods(TimeTable solution, TimetableRequest request) {
+        // Use the unassigned periods calculated during lesson generation in the service
+        return timeTableService.getUnassignedPeriods();
+    }
+
+    private Map<String, Map<String, Map<String, Integer>>> calculateDetailedUnassignedPeriods(TimeTable solution) {
+        // Use the detailed unassigned periods calculated during lesson generation in the service
+        return timeTableService.getDetailedUnassignedPeriods();
     }
 }

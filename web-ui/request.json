@@ -67,7 +67,7 @@
     {
       "subject": "Mathematics",
       "grade": "10",
-      "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal Udugama"],
+      "possibleTeachers": ["Shehan Mallawarachchi", "Tharindu Silva", "Malinda Perera","Namal Udugama"],
       "periodsPerWeek": 6,
       "maxPeriodsPerDay": 2
     },
@@ -130,7 +130,7 @@
     {
       "subject": "Mathematics",
       "grade": "11",
-      "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal Udugama"],
+      "possibleTeachers": ["Shehan Mallawarachchi", "Tharindu Silva", "Malinda Perera","Namal Udugama"],
       "periodsPerWeek": 6,
       "maxPeriodsPerDay": 2
     },

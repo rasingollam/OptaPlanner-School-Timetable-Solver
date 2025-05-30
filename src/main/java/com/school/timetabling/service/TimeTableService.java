@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -159,176 +161,195 @@ public class TimeTableService {
             }
         }
 
-        // Get workload configuration
-        int maxPeriodsPerTeacher = request.getTeacherWorkloadConfig() != null ? 
-            request.getTeacherWorkloadConfig().getMaxPeriodsPerTeacherPerWeek() : 30;
-
-        // Phase 1: Assign teachers to classes using balanced distribution
-        Map<String, Map<String, String>> classTeacherAssignments = assignTeachersToClasses(request, maxPeriodsPerTeacher);
-        
-        // Phase 2: Generate lessons based on teacher assignments
-        List<Lesson> lessons = generateLessonsFromAssignments(request, studentGroups, classTeacherAssignments);
+        // Generate ALL required lessons and let OptaPlanner handle teacher assignments
+        List<Lesson> lessons = generateAllRequiredLessons(request, studentGroups);
 
         return new TimeTable(timeslots, studentGroups, lessons);
     }
 
-    private Map<String, Map<String, String>> assignTeachersToClasses(TimetableRequest request, int maxPeriodsPerTeacher) {
-        // Structure: subject -> className -> assignedTeacher
-        Map<String, Map<String, String>> assignments = new HashMap<>();
-        
-        // Track teacher workloads globally across all subjects
-        Map<String, Integer> globalTeacherWorkload = new HashMap<>();
-        
-        // Initialize all possible teachers with 0 workload
-        for (TimetableRequest.LessonAssignment assignment : request.getLessonAssignmentList()) {
-            for (String teacher : assignment.getPossibleTeachers()) {
-                globalTeacherWorkload.putIfAbsent(teacher, 0);
-            }
-        }
-        
-        // Log the workload limit being used
-        System.out.println("Using maxPeriodsPerTeacher from request: " + maxPeriodsPerTeacher);
-        
-        // Process each subject-grade combination
-        for (TimetableRequest.LessonAssignment assignment : request.getLessonAssignmentList()) {
-            String subject = assignment.getSubject();
-            String grade = assignment.getGrade();
-            int periodsPerClass = assignment.getPeriodsPerWeek();
-            
-            // Log the constraint being used for this subject
-            System.out.println("Using maxPeriodsPerDay from request for " + subject + " - Grade " + grade + ": " + assignment.getMaxPeriodsPerDay());
-            
-            // Find classes for this grade
-            List<String> classesForGrade = request.getClassList().stream()
-                .filter(classInfo -> classInfo.getGrade().equals(grade))
-                .flatMap(classInfo -> classInfo.getClasses().stream())
-                .sorted() // Ensure consistent ordering
-                .collect(Collectors.toList());
-            
-            // Get available teachers sorted by current workload (ascending)
-            List<String> availableTeachers = assignment.getPossibleTeachers().stream()
-                .sorted((t1, t2) -> globalTeacherWorkload.get(t1).compareTo(globalTeacherWorkload.get(t2)))
-                .collect(Collectors.toList());
-            
-            Map<String, String> subjectAssignments = new HashMap<>();
-            List<String> unassignedClasses = new ArrayList<>();
-            
-            // Round-robin assignment with workload balancing
-            int teacherIndex = 0;
-            for (String className : classesForGrade) {
-                String fullClassName = grade + className;
-                String assignedTeacher = null;
-                
-                // Try to find a teacher with available capacity, starting from least loaded
-                int attempts = 0;
-                while (attempts < availableTeachers.size()) {
-                    String candidateTeacher = availableTeachers.get(teacherIndex % availableTeachers.size());
-                    int currentWorkload = globalTeacherWorkload.get(candidateTeacher);
-                    
-                    if (currentWorkload + periodsPerClass <= maxPeriodsPerTeacher) {
-                        assignedTeacher = candidateTeacher;
-                        globalTeacherWorkload.put(candidateTeacher, currentWorkload + periodsPerClass);
-                        subjectAssignments.put(fullClassName, assignedTeacher);
-                        
-                        // Move to next teacher for next class (round-robin)
-                        teacherIndex = (teacherIndex + 1) % availableTeachers.size();
-                        break;
-                    }
-                    
-                    // Try next teacher
-                    teacherIndex = (teacherIndex + 1) % availableTeachers.size();
-                    attempts++;
-                }
-                
-                // If no teacher found, track as unassigned
-                if (assignedTeacher == null) {
-                    unassignedClasses.add(className);
-                    
-                    // Track unassigned periods
-                    unassignedPeriods.computeIfAbsent(grade, k -> new HashMap<>())
-                        .merge(subject, periodsPerClass, Integer::sum);
-                    
-                    detailedUnassignedPeriods
-                        .computeIfAbsent(grade, k -> new HashMap<>())
-                        .computeIfAbsent(subject, k -> new HashMap<>())
-                        .merge(className, periodsPerClass, Integer::sum);
-                }
-            }
-            
-            assignments.put(subject + "-" + grade, subjectAssignments);
-            
-            // Log assignment results
-            int totalClasses = classesForGrade.size();
-            int assignedClasses = totalClasses - unassignedClasses.size();
-            int totalPeriods = totalClasses * periodsPerClass;
-            int assignedPeriods = assignedClasses * periodsPerClass;
-            int unassignedPeriodsCount = unassignedClasses.size() * periodsPerClass;
-            
-            System.out.println(String.format(
-                "Grade %s - %s: %d/%d classes assigned, %d/%d periods assigned, %d periods unassigned for classes %s", 
-                grade, subject, assignedClasses, totalClasses, assignedPeriods, totalPeriods, 
-                unassignedPeriodsCount, unassignedClasses
-            ));
-        }
-        
-        // Log final teacher workload distribution
-        System.out.println("\nFinal teacher workload distribution (limit: " + maxPeriodsPerTeacher + "):");
-        globalTeacherWorkload.entrySet().stream()
-            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-            .forEach(entry -> System.out.println(String.format("  %s: %d periods", entry.getKey(), entry.getValue())));
-        
-        return assignments;
-    }
-
-    private List<Lesson> generateLessonsFromAssignments(TimetableRequest request, 
-                                                       List<StudentGroup> studentGroups, 
-                                                       Map<String, Map<String, String>> assignments) {
+    private List<Lesson> generateAllRequiredLessons(TimetableRequest request, List<StudentGroup> studentGroups) {
         List<Lesson> lessons = new ArrayList<>();
         long lessonId = 0;
         
+        // Track teacher workload
+        Map<String, Integer> teacherWorkload = new HashMap<>();
+        int maxPeriodsPerTeacher = getMaxPeriodsPerTeacher(request);
+        
+        System.out.println(String.format("=== Teacher Assignment Analysis ==="));
+        System.out.println(String.format("Max periods per teacher: %d", maxPeriodsPerTeacher));
+        
+        // Initialize all possible teachers from all subjects
+        Set<String> allTeachers = new HashSet<>();
+        for (TimetableRequest.LessonAssignment assignment : request.getLessonAssignmentList()) {
+            allTeachers.addAll(assignment.getPossibleTeachers());
+        }
+        
+        for (String teacher : allTeachers) {
+            teacherWorkload.put(teacher, 0);
+        }
+        
+        System.out.println(String.format("Total teachers available: %d", allTeachers.size()));
+        
+        // Calculate total demand
+        int totalDemand = 0;
+        Map<String, Integer> subjectDemand = new HashMap<>();
+        
+        for (TimetableRequest.LessonAssignment assignment : request.getLessonAssignmentList()) {
+            String grade = assignment.getGrade();
+            int periodsPerWeek = assignment.getPeriodsPerWeek();
+            
+            // Count classes for this grade
+            int classCount = studentGroups.stream()
+                .filter(sg -> sg.getGrade().equals(grade))
+                .collect(Collectors.toList()).size();
+            
+            int subjectTotal = periodsPerWeek * classCount;
+            subjectDemand.put(assignment.getSubject() + "-Grade" + grade, subjectTotal);
+            totalDemand += subjectTotal;
+        }
+        
+        System.out.println(String.format("Total demand: %d periods", totalDemand));
+        System.out.println(String.format("Total capacity: %d periods (%d teachers × %d periods)", 
+            allTeachers.size() * maxPeriodsPerTeacher, allTeachers.size(), maxPeriodsPerTeacher));
+        
+        // Create lessons with improved teacher assignment
         for (TimetableRequest.LessonAssignment assignment : request.getLessonAssignmentList()) {
             String subject = assignment.getSubject();
             String grade = assignment.getGrade();
-            String assignmentKey = subject + "-" + grade;
+            int periodsPerWeek = assignment.getPeriodsPerWeek();
+            List<String> possibleTeachers = assignment.getPossibleTeachers();
             
-            Map<String, String> classTeachers = assignments.get(assignmentKey);
-            if (classTeachers == null) continue;
+            // Find all student groups for this grade
+            List<StudentGroup> classesForGrade = studentGroups.stream()
+                .filter(sg -> sg.getGrade().equals(grade))
+                .sorted((sg1, sg2) -> sg1.getClassName().compareTo(sg2.getClassName()))
+                .collect(Collectors.toList());
             
-            // Create lessons for each assigned class
-            for (Map.Entry<String, String> entry : classTeachers.entrySet()) {
-                String fullClassName = entry.getKey();
-                String teacher = entry.getValue();
+            System.out.println(String.format("\n--- Processing %s Grade %s ---", subject, grade));
+            System.out.println(String.format("Classes: %d, Periods per class: %d, Total periods needed: %d", 
+                classesForGrade.size(), periodsPerWeek, classesForGrade.size() * periodsPerWeek));
+            System.out.println(String.format("Available teachers: %s", possibleTeachers));
+            
+            // Sort teachers by current workload (least loaded first)
+            List<String> sortedTeachers = possibleTeachers.stream()
+                .sorted((t1, t2) -> teacherWorkload.get(t1).compareTo(teacherWorkload.get(t2)))
+                .collect(Collectors.toList());
+            
+            // Assign teachers to classes using load balancing
+            for (int classIndex = 0; classIndex < classesForGrade.size(); classIndex++) {
+                StudentGroup studentGroup = classesForGrade.get(classIndex);
+                String assignedTeacher = null;
                 
-                // Find the corresponding student group
-                // The StudentGroup constructor takes: (name, grade, className, size)
-                // So we need to match by the full name which is grade + className
-                StudentGroup studentGroup = studentGroups.stream()
-                    .filter(sg -> {
-                        // Match by constructing the expected full name from grade and className
-                        String expectedName = sg.getGrade() + sg.getClassName();
-                        return expectedName.equals(fullClassName);
-                    })
-                    .findFirst()
-                    .orElse(null);
+                // Try to find a teacher with capacity
+                for (String candidateTeacher : sortedTeachers) {
+                    if (teacherWorkload.get(candidateTeacher) + periodsPerWeek <= maxPeriodsPerTeacher) {
+                        assignedTeacher = candidateTeacher;
+                        break;
+                    }
+                }
                 
-                if (studentGroup != null) {
-                    // Create the specified number of lessons for this class
-                    for (int i = 0; i < assignment.getPeriodsPerWeek(); i++) {
-                        lessons.add(new Lesson(
+                if (assignedTeacher != null) {
+                    // Update teacher workload
+                    teacherWorkload.put(assignedTeacher, teacherWorkload.get(assignedTeacher) + periodsPerWeek);
+                    
+                    // Create all lessons for this class with the assigned teacher
+                    for (int period = 0; period < periodsPerWeek; period++) {
+                        Lesson lesson = new Lesson(
                             lessonId++,
                             subject,
-                            teacher,
+                            assignedTeacher,
                             studentGroup
-                        ));
+                        );
+                        lessons.add(lesson);
                     }
+                    
+                    System.out.println(String.format("✓ Assigned %s to teach %s for class %s%s (%d periods, workload: %d/%d)", 
+                        assignedTeacher, subject, grade, studentGroup.getClassName(), 
+                        periodsPerWeek, teacherWorkload.get(assignedTeacher), maxPeriodsPerTeacher));
+                    
+                    // Re-sort teachers for next assignment
+                    sortedTeachers.sort((t1, t2) -> teacherWorkload.get(t1).compareTo(teacherWorkload.get(t2)));
                 } else {
-                    // Log warning if student group not found
-                    System.err.println("Warning: Could not find student group for " + fullClassName);
+                    // Track unassigned periods
+                    String gradeStr = grade;
+                    String className = studentGroup.getClassName();
+                    
+                    unassignedPeriods.computeIfAbsent(gradeStr, k -> new HashMap<>())
+                                   .merge(subject, periodsPerWeek, Integer::sum);
+                    
+                    detailedUnassignedPeriods.computeIfAbsent(gradeStr, k -> new HashMap<>())
+                                           .computeIfAbsent(subject, k -> new HashMap<>())
+                                           .put(className, periodsPerWeek);
+                    
+                    System.out.println(String.format("✗ Could not assign teacher for %s - Grade %s Class %s (%d periods unassigned)", 
+                        subject, grade, className, periodsPerWeek));
+                    
+                    // Show teacher availability
+                    System.out.println("Current teacher workloads for this subject:");
+                    for (String teacher : possibleTeachers) {
+                        int currentLoad = teacherWorkload.get(teacher);
+                        int remaining = maxPeriodsPerTeacher - currentLoad;
+                        System.out.println(String.format("  %s: %d/%d (remaining: %d, needed: %d)", 
+                            teacher, currentLoad, maxPeriodsPerTeacher, remaining, periodsPerWeek));
+                    }
                 }
             }
         }
         
-        System.out.println(String.format("\nGenerated %d lessons total", lessons.size()));
+        System.out.println(String.format("\n=== Final Results ==="));
+        System.out.println(String.format("Generated %d lessons total with teacher assignments", lessons.size()));
+        
+        // Log final teacher workloads
+        System.out.println("\nFinal teacher workloads:");
+        teacherWorkload.entrySet().stream()
+            .filter(entry -> entry.getValue() > 0) // Only show teachers with assignments
+            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+            .forEach(entry -> {
+                double utilization = (entry.getValue() * 100.0) / maxPeriodsPerTeacher;
+                String status = entry.getValue() >= maxPeriodsPerTeacher ? " (AT CAPACITY)" :
+                               entry.getValue() >= maxPeriodsPerTeacher * 0.9 ? " (NEAR CAPACITY)" : "";
+                System.out.println(String.format("  %s: %d/%d periods (%.1f%% utilization)%s", 
+                    entry.getKey(), entry.getValue(), maxPeriodsPerTeacher, utilization, status));
+            });
+        
+        // Calculate and display assignment statistics
+        int totalAssigned = lessons.size();
+        int totalUnassigned = totalDemand - totalAssigned;
+        double successRate = (totalAssigned * 100.0) / totalDemand;
+        
+        System.out.println(String.format("\n=== Assignment Statistics ==="));
+        System.out.println(String.format("Total demand: %d periods", totalDemand));
+        System.out.println(String.format("Successfully assigned: %d periods (%.1f%%)", totalAssigned, successRate));
+        System.out.println(String.format("Unassigned: %d periods (%.1f%%)", totalUnassigned, 100.0 - successRate));
+        
+        // Log unassigned summary
+        if (!unassignedPeriods.isEmpty()) {
+            System.out.println("\nUnassigned periods breakdown:");
+            unassignedPeriods.forEach((grade, subjectMap) -> {
+                subjectMap.forEach((subject, count) -> {
+                    System.out.println(String.format("  Grade %s - %s: %d periods unassigned", grade, subject, count));
+                });
+            });
+            
+            // Suggest solutions
+            System.out.println("\n=== Suggested Solutions ===");
+            System.out.println("1. Increase maxPeriodsPerTeacherPerWeek in teacherWorkloadConfig");
+            System.out.println("2. Add more teachers to subjects with unassigned periods");
+            System.out.println("3. Reduce periodsPerWeek for some subjects");
+            System.out.println("4. Reduce number of classes per grade");
+        }
+        
         return lessons;
+    }
+    
+    private int getMaxPeriodsPerTeacher(TimetableRequest request) {
+        if (request.getTeacherWorkloadConfig() != null && 
+            request.getTeacherWorkloadConfig().getMaxPeriodsPerTeacherPerWeek() > 0) {
+            return request.getTeacherWorkloadConfig().getMaxPeriodsPerTeacherPerWeek();
+        } else {
+            // Calculate reasonable default based on request data
+            int totalTimeslots = request.getTimeslotList() != null ? request.getTimeslotList().size() : 40;
+            return Math.max(20, totalTimeslots / 2); // Conservative estimate
+        }
     }
 }

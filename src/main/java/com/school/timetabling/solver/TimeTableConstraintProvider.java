@@ -11,17 +11,6 @@ import static org.optaplanner.core.api.score.stream.ConstraintCollectors.count;
 
 public class TimeTableConstraintProvider implements ConstraintProvider {
 
-    @Override
-    public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
-        return new Constraint[] {
-                // Hard constraints
-                teacherConflict(constraintFactory),
-                studentGroupConflict(constraintFactory),
-                maxPeriodsPerDayPerSubject(constraintFactory),
-                teacherWorkloadLimit(constraintFactory)
-        };
-    }
-
     private Constraint teacherConflict(ConstraintFactory constraintFactory) {
         return constraintFactory
                 .forEachUniquePair(Lesson.class,
@@ -74,29 +63,46 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .asConstraint("Max periods per day per subject");
     }
 
-    private Constraint teacherWorkloadLimit(ConstraintFactory constraintFactory) {
+    public Constraint teacherWorkloadLimit(ConstraintFactory constraintFactory) {
         return constraintFactory
                 .forEach(Lesson.class)
-                .filter(lesson -> lesson.getTimeslot() != null) // Only consider assigned lessons
+                .filter(lesson -> lesson.getTeacher() != null) // Only count assigned lessons
                 .groupBy(Lesson::getTeacher, count())
                 .filter((teacher, lessonCount) -> {
                     int maxPeriodsPerTeacher = TimeTableConstraintConfig.getMaxPeriodsPerTeacher();
-                    boolean violates = lessonCount > maxPeriodsPerTeacher;
-                    
-                    if (violates) {
-                        System.out.println("TEACHER WORKLOAD VIOLATION: " + teacher + " has " + lessonCount + 
-                                         " periods (max allowed: " + maxPeriodsPerTeacher + ")");
-                    }
-                    
-                    return violates;
+                    return lessonCount > maxPeriodsPerTeacher;
                 })
-                .penalize(HardSoftScore.ONE_HARD, 
-                        (teacher, lessonCount) -> {
-                            int maxPeriodsPerTeacher = TimeTableConstraintConfig.getMaxPeriodsPerTeacher();
-                            int violation = lessonCount - maxPeriodsPerTeacher;
-                            System.out.println("TEACHER PENALTY: " + violation + " points for " + teacher);
-                            return violation;
-                        })
+                .penalize(HardSoftScore.ONE_HARD,
+                    (teacher, lessonCount) -> {
+                        int maxPeriodsPerTeacher = TimeTableConstraintConfig.getMaxPeriodsPerTeacher();
+                        int excess = lessonCount - maxPeriodsPerTeacher;
+                        System.out.println("Teacher workload violation: " + teacher + " has " + lessonCount + 
+                                         " lessons (limit: " + maxPeriodsPerTeacher + ", excess: " + excess + ")");
+                        return excess;
+                    })
                 .asConstraint("Teacher workload limit");
+    }
+
+    // Add a soft constraint to prefer assigning teachers (to avoid null assignments)
+    public Constraint preferAssignedTeachers(ConstraintFactory constraintFactory) {
+        return constraintFactory
+                .forEach(Lesson.class)
+                .filter(lesson -> lesson.getTeacher() == null)
+                .penalize(HardSoftScore.ONE_SOFT)
+                .asConstraint("Prefer assigned teachers");
+    }
+
+    @Override
+    public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
+        return new Constraint[] {
+                // Hard constraints
+                teacherConflict(constraintFactory),
+                studentGroupConflict(constraintFactory),
+                maxPeriodsPerDayPerSubject(constraintFactory),
+                teacherWorkloadLimit(constraintFactory),
+                
+                // Soft constraints
+                preferAssignedTeachers(constraintFactory)
+        };
     }
 }
