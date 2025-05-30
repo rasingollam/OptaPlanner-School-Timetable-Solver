@@ -4,90 +4,6 @@ let subjectColorMap = new Map();
 let availableDays = [];
 let availableTimeSlots = [];
 
-// Color palette for dynamic subject assignment
-const COLOR_PALETTE = [
-    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-    'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-    'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
-    'linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%)',
-    'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)',
-    'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
-    'linear-gradient(135deg, #fd79a8 0%, #e84393 100%)',
-    'linear-gradient(135deg, #fdcb6e 0%, #e17055 100%)',
-    'linear-gradient(135deg, #55a3ff 0%, #003d82 100%)'
-];
-
-// Sample data as fallback when request.json cannot be loaded
-const FALLBACK_CONFIG = {
-    "timeslotList": [
-        {"id": 1, "dayOfWeek": "MONDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
-        {"id": 2, "dayOfWeek": "MONDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
-        {"id": 3, "dayOfWeek": "MONDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
-        {"id": 4, "dayOfWeek": "MONDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
-        {"id": 5, "dayOfWeek": "MONDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
-        {"id": 6, "dayOfWeek": "MONDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
-        {"id": 7, "dayOfWeek": "MONDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
-        {"id": 8, "dayOfWeek": "MONDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
-        {"id": 9, "dayOfWeek": "TUESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
-        {"id": 10, "dayOfWeek": "TUESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
-        {"id": 11, "dayOfWeek": "TUESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
-        {"id": 12, "dayOfWeek": "TUESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
-        {"id": 13, "dayOfWeek": "TUESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
-        {"id": 14, "dayOfWeek": "TUESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
-        {"id": 15, "dayOfWeek": "TUESDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
-        {"id": 16, "dayOfWeek": "TUESDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
-        {"id": 17, "dayOfWeek": "WEDNESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
-        {"id": 18, "dayOfWeek": "WEDNESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
-        {"id": 19, "dayOfWeek": "WEDNESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
-        {"id": 20, "dayOfWeek": "WEDNESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
-        {"id": 21, "dayOfWeek": "WEDNESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
-        {"id": 22, "dayOfWeek": "WEDNESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
-        {"id": 23, "dayOfWeek": "WEDNESDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
-        {"id": 24, "dayOfWeek": "WEDNESDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
-        {"id": 25, "dayOfWeek": "THURSDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
-        {"id": 26, "dayOfWeek": "THURSDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
-        {"id": 27, "dayOfWeek": "THURSDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
-        {"id": 28, "dayOfWeek": "THURSDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
-        {"id": 29, "dayOfWeek": "THURSDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
-        {"id": 30, "dayOfWeek": "THURSDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
-        {"id": 31, "dayOfWeek": "THURSDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
-        {"id": 32, "dayOfWeek": "THURSDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
-        {"id": 33, "dayOfWeek": "FRIDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
-        {"id": 34, "dayOfWeek": "FRIDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
-        {"id": 35, "dayOfWeek": "FRIDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
-        {"id": 36, "dayOfWeek": "FRIDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
-        {"id": 37, "dayOfWeek": "FRIDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
-        {"id": 38, "dayOfWeek": "FRIDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
-        {"id": 39, "dayOfWeek": "FRIDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
-        {"id": 40, "dayOfWeek": "FRIDAY", "startTime": "12:50:00", "endTime": "13:30:00"}
-    ],
-    "classList": [
-        {"grade": "9th", "classes": ["A", "B", "C", "D", "E", "F", "G", "H"]},
-        {"grade": "10th", "classes": ["A", "B", "C", "D", "E", "F", "G", "H"]}
-    ],
-    "teacherWorkloadConfig": {
-        "totalTimeslotsPerWeek": 40,
-        "freePeriodsPerTeacherPerWeek": 5,
-        "maxPeriodsPerTeacherPerWeek": 20
-    },
-    "subjectList": ["Math", "English", "Chemistry", "Physics", "Biology"],
-    "lessonAssignmentList": [
-        {"subject": "Math", "grade": "9th", "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal","Komal"], "periodsPerWeek": 7, "maxPeriodsPerDay": 2},
-        {"subject": "English", "grade": "9th", "possibleTeachers": ["William Shakespeare", "Jane Austen"], "periodsPerWeek": 5, "maxPeriodsPerDay": 1},
-        {"subject": "Chemistry", "grade": "9th", "possibleTeachers": ["Marie Curie", "Antoine Lavoisier"], "periodsPerWeek": 2, "maxPeriodsPerDay": 1},
-        {"subject": "Physics", "grade": "9th", "possibleTeachers": ["Albert Einstein", "Isaac Newton"], "periodsPerWeek": 2, "maxPeriodsPerDay": 1},
-        {"subject": "Biology", "grade": "9th", "possibleTeachers": ["Charles Darwin", "Gregor Mendel"], "periodsPerWeek": 2, "maxPeriodsPerDay": 1},
-        {"subject": "Math", "grade": "10th", "possibleTeachers": ["Danul", "Kasun", "Nimal","Safeet","Binura"], "periodsPerWeek": 8, "maxPeriodsPerDay": 2},
-        {"subject": "English", "grade": "10th", "possibleTeachers": ["Navindu", "Anuththara","Rashika Ramachandran"], "periodsPerWeek": 5, "maxPeriodsPerDay": 2}
-    ]
-};
-
 async function loadRequestJson() {
     // Try multiple possible paths for request.json
     const possiblePaths = [
@@ -117,15 +33,26 @@ async function loadRequestJson() {
     }
     
     if (!loadedSuccessfully) {
-        console.warn('Could not load request.json from any path, using fallback configuration');
-        showApiStatus('Could not load request.json file. Using sample configuration. Make sure to serve files through a web server (not file://).', 'warning');
-        loadFallbackConfiguration();
+        console.warn('Could not load request.json from any path');
+        showApiStatus('Could not load request.json file. Please create one or serve files through a web server (not file://).', 'warning');
+        loadEmptyConfiguration();
     }
 }
 
-function loadFallbackConfiguration() {
-    document.getElementById('jsonInput').value = JSON.stringify(FALLBACK_CONFIG, null, 2);
-    extractTimeslotInfo(FALLBACK_CONFIG.timeslotList);
+function loadEmptyConfiguration() {
+    const emptyConfig = {
+        "timeslotList": [],
+        "classList": [],
+        "teacherWorkloadConfig": {
+            "totalTimeslotsPerWeek": 40,
+            "freePeriodsPerTeacherPerWeek": 5,
+            "maxPeriodsPerTeacherPerWeek": 20
+        },
+        "subjectList": [],
+        "lessonAssignmentList": []
+    };
+    
+    document.getElementById('jsonInput').value = JSON.stringify(emptyConfig, null, 2);
     clearValidation();
 }
 
@@ -146,38 +73,18 @@ function extractTimeslotInfo(timeslotList) {
     availableTimeSlots = Array.from(times).sort();
 }
 
-function loadEmptyConfiguration() {
-    const emptyConfig = {
-        "timeslotList": [],
-        "classList": [],
-        "teacherWorkloadConfig": {
-            "totalTimeslotsPerWeek": 30,
-            "freePeriodsPerTeacherPerWeek": 5,
-            "maxPeriodsPerTeacherPerWeek": 20
-        },
-        "subjectList": [],
-        "lessonAssignmentList": []
-    };
-    
-    document.getElementById('jsonInput').value = JSON.stringify(emptyConfig, null, 2);
-    clearValidation();
-}
-
 function assignSubjectColors(subjects) {
     subjectColorMap.clear();
     
+    // Assign color index based on subject order
     subjects.forEach((subject, index) => {
-        const colorIndex = index % COLOR_PALETTE.length;
-        subjectColorMap.set(subject, {
-            index: colorIndex,
-            gradient: COLOR_PALETTE[colorIndex]
-        });
+        subjectColorMap.set(subject, index);
     });
 }
 
 function getSubjectColorClass(subject) {
-    const colorInfo = subjectColorMap.get(subject);
-    return colorInfo ? `subject-color-${colorInfo.index}` : 'subject-color-0';
+    const colorIndex = subjectColorMap.get(subject);
+    return colorIndex !== undefined ? `subject-color-${colorIndex}` : 'subject-color-0';
 }
 
 function createSubjectLegend(subjects) {
@@ -186,15 +93,13 @@ function createSubjectLegend(subjects) {
     let legendHtml = '<div class="subject-legend"><strong>Subject Colors:</strong>';
     
     subjects.forEach(subject => {
-        const colorInfo = subjectColorMap.get(subject);
-        if (colorInfo) {
-            legendHtml += `
-                <div class="legend-item">
-                    <div class="legend-color subject-color-${colorInfo.index}"></div>
-                    <span>${subject}</span>
-                </div>
-            `;
-        }
+        const colorClass = getSubjectColorClass(subject);
+        legendHtml += `
+            <div class="legend-item">
+                <div class="legend-color ${colorClass}"></div>
+                <span>${subject}</span>
+            </div>
+        `;
     });
     
     legendHtml += '</div>';
@@ -495,45 +400,6 @@ function displayTeacherWorkload(workloadSummary) {
     container.innerHTML = html;
 }
 
-// Add toggle functionality for detailed view
-function toggleUnassignedDetails() {
-    const detailsSection = document.getElementById('unassignedDetails');
-    if (detailsSection) {
-        detailsSection.classList.toggle('d-none');
-    }
-}
-
-// Initialize page
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're running from file:// protocol
-    if (window.location.protocol === 'file:') {
-        showApiStatus('⚠️ Running from file:// protocol. For best experience, serve files through a web server. See instructions below.', 'warning');
-        
-        // Add server setup instructions
-        setTimeout(() => {
-            const statusDiv = document.getElementById('apiStatus');
-            statusDiv.innerHTML += `
-                <div class="alert alert-info alert-custom mt-2" role="alert">
-                    <strong>How to serve files:</strong><br>
-                    <code>cd /home/rasi/Documents/Education/OptaPlanner-School-Timetable-Solver</code><br>
-                    <code>python3 -m http.server 8000</code><br>
-                    Then open: <a href="http://localhost:8000/web-ui/" target="_blank">http://localhost:8000/web-ui/</a>
-                </div>
-            `;
-        }, 1000);
-    }
-    
-    // Load actual request.json by default
-    loadRequestJson();
-    
-    // Add Enter key support for processing
-    document.getElementById('jsonInput').addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'Enter') {
-            processTimetable();
-        }
-    });
-});
-
 function displayUnassignedSummary(unassignedSummary) {
     const countDisplay = document.getElementById('unassignedCount');
     const messageDisplay = document.getElementById('unassignedMessage');
@@ -771,3 +637,42 @@ function generateClassLevelBreakdownFromBackendData(grade, subject, subjectDetai
     
     return html;
 }
+
+// Add toggle functionality for detailed view
+function toggleUnassignedDetails() {
+    const detailsSection = document.getElementById('unassignedDetails');
+    if (detailsSection) {
+        detailsSection.classList.toggle('d-none');
+    }
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're running from file:// protocol
+    if (window.location.protocol === 'file:') {
+        showApiStatus('⚠️ Running from file:// protocol. For best experience, serve files through a web server. See instructions below.', 'warning');
+        
+        // Add server setup instructions
+        setTimeout(() => {
+            const statusDiv = document.getElementById('apiStatus');
+            statusDiv.innerHTML += `
+                <div class="alert alert-info alert-custom mt-2" role="alert">
+                    <strong>How to serve files:</strong><br>
+                    <code>cd /home/rasi/Documents/Education/OptaPlanner-School-Timetable-Solver</code><br>
+                    <code>python3 -m http.server 8000</code><br>
+                    Then open: <a href="http://localhost:8000/web-ui/" target="_blank">http://localhost:8000/web-ui/</a>
+                </div>
+            `;
+        }, 1000);
+    }
+    
+    // Load actual request.json by default
+    loadRequestJson();
+    
+    // Add Enter key support for processing
+    document.getElementById('jsonInput').addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            processTimetable();
+        }
+    });
+});

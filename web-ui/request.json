@@ -47,53 +47,46 @@
   ],
   "classList": [
     {
-      "grade": "9th",
-      "classes": ["A", "B", "C", "D", "E", "F", "G", "H"]
+      "grade": "12",
+      "classes": ["A", "B", "C", "D"]
     }
   ],
   "teacherWorkloadConfig": {
     "totalTimeslotsPerWeek": 20,
-    "freePeriodsPerTeacherPerWeek": 5,
-    "maxPeriodsPerTeacherPerWeek": 13
+    "freePeriodsPerTeacherPerWeek": 10,
+    "maxPeriodsPerTeacherPerWeek": 30
   },
   "subjectList": [
-    "Math", "English", "Chemistry", "Physics", "Biology"
+    "Math", "English", "Chemistry", "Physics"
   ],
   "lessonAssignmentList": [
     {
-      "subject": "Math",
-      "grade": "9th",
-      "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal","Komal"],
-      "periodsPerWeek": 7,
+      "subject": "Mathematics",
+      "grade": "12",
+      "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal"],
+      "periodsPerWeek": 10,
       "maxPeriodsPerDay": 2
     },
     {
       "subject": "English",
-      "grade": "9th",
-      "possibleTeachers": ["William Shakespeare", "Jane Austen"],
-      "periodsPerWeek": 5,
-      "maxPeriodsPerDay": 1
+      "grade": "12",
+      "possibleTeachers": ["William Shakespeare", "Jane Austen", "Isuru Somarathne"],
+      "periodsPerWeek": 10,
+      "maxPeriodsPerDay": 2
     },
     {
       "subject": "Chemistry",
-      "grade": "9th",
-      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier"],
-      "periodsPerWeek": 2,
-      "maxPeriodsPerDay": 1
+      "grade": "12",
+      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier","Denso Kobbakaduwa"],
+      "periodsPerWeek": 10,
+      "maxPeriodsPerDay": 2
     },
     {
       "subject": "Physics",
-      "grade": "9th",
-      "possibleTeachers": ["Albert Einstein", "Isaac Newton"],
-      "periodsPerWeek": 2,
-      "maxPeriodsPerDay": 1
-    },
-    {
-      "subject": "Biology",
-      "grade": "9th",
-      "possibleTeachers": ["Charles Darwin", "Gregor Mendel"],
-      "periodsPerWeek": 2,
-      "maxPeriodsPerDay": 1
+      "grade": "12",
+      "possibleTeachers": ["Albert Einstein", "Isaac Newton","Darshana Ukuwela"],
+      "periodsPerWeek": 10,
+      "maxPeriodsPerDay": 2
     }
   ]
 }
