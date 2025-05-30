@@ -43,17 +43,33 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
     private Constraint maxPeriodsPerDayPerSubject(ConstraintFactory constraintFactory) {
         return constraintFactory
                 .forEach(Lesson.class)
-                .groupBy(Lesson::getStudentGroup, Lesson::getSubject, 
-                        lesson -> lesson.getTimeslot().getDayOfWeek(), count())
+                .filter(lesson -> lesson.getTimeslot() != null) // Only consider assigned lessons
+                .groupBy(
+                    Lesson::getStudentGroup, 
+                    Lesson::getSubject, 
+                    lesson -> lesson.getTimeslot().getDayOfWeek(), 
+                    count()
+                )
                 .filter((studentGroup, subject, dayOfWeek, lessonCount) -> {
-                    // Get maxPeriodsPerDay from the lesson's maxPeriodsPerDay field
-                    int maxPeriodsPerDay = getMaxPeriodsPerDay(subject, studentGroup.getGrade());
-                    return lessonCount > maxPeriodsPerDay;
+                    // Get maxPeriodsPerDay from configuration
+                    int maxPeriodsPerDay = TimeTableConstraintConfig.getMaxPeriodsPerDay(subject, studentGroup.getGrade());
+                    boolean violates = lessonCount > maxPeriodsPerDay;
+                    
+                    if (violates) {
+                        System.out.println("CONSTRAINT VIOLATION: " + studentGroup.getGrade() + studentGroup.getClassName() + 
+                                         " has " + lessonCount + " " + subject + " periods on " + dayOfWeek + 
+                                         " (max allowed: " + maxPeriodsPerDay + ")");
+                    }
+                    
+                    return violates;
                 })
                 .penalize(HardSoftScore.ONE_HARD,
                         (studentGroup, subject, dayOfWeek, lessonCount) -> {
-                            int maxPeriodsPerDay = getMaxPeriodsPerDay(subject, studentGroup.getGrade());
-                            return lessonCount - maxPeriodsPerDay;
+                            int maxPeriodsPerDay = TimeTableConstraintConfig.getMaxPeriodsPerDay(subject, studentGroup.getGrade());
+                            int violation = lessonCount - maxPeriodsPerDay;
+                            System.out.println("PENALTY: " + violation + " points for " + subject + " in " + 
+                                             studentGroup.getGrade() + studentGroup.getClassName() + " on " + dayOfWeek);
+                            return violation;
                         })
                 .asConstraint("Max periods per day per subject");
     }
@@ -61,28 +77,26 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
     private Constraint teacherWorkloadLimit(ConstraintFactory constraintFactory) {
         return constraintFactory
                 .forEach(Lesson.class)
+                .filter(lesson -> lesson.getTimeslot() != null) // Only consider assigned lessons
                 .groupBy(Lesson::getTeacher, count())
                 .filter((teacher, lessonCount) -> {
-                    // Get dynamic workload limit from the TimeTable's configuration
-                    int maxPeriodsPerTeacher = getMaxPeriodsPerTeacher();
-                    return lessonCount > maxPeriodsPerTeacher;
+                    int maxPeriodsPerTeacher = TimeTableConstraintConfig.getMaxPeriodsPerTeacher();
+                    boolean violates = lessonCount > maxPeriodsPerTeacher;
+                    
+                    if (violates) {
+                        System.out.println("TEACHER WORKLOAD VIOLATION: " + teacher + " has " + lessonCount + 
+                                         " periods (max allowed: " + maxPeriodsPerTeacher + ")");
+                    }
+                    
+                    return violates;
                 })
                 .penalize(HardSoftScore.ONE_HARD, 
                         (teacher, lessonCount) -> {
-                            int maxPeriodsPerTeacher = getMaxPeriodsPerTeacher();
-                            return lessonCount - maxPeriodsPerTeacher;
+                            int maxPeriodsPerTeacher = TimeTableConstraintConfig.getMaxPeriodsPerTeacher();
+                            int violation = lessonCount - maxPeriodsPerTeacher;
+                            System.out.println("TEACHER PENALTY: " + violation + " points for " + teacher);
+                            return violation;
                         })
                 .asConstraint("Teacher workload limit");
-    }
-
-    private int getMaxPeriodsPerDay(String subject, String grade) {
-        // Get the configuration from the TimeTable's constraint configuration
-        // This should be injected from the request configuration
-        return TimeTableConstraintConfig.getMaxPeriodsPerDay(subject, grade);
-    }
-    
-    private int getMaxPeriodsPerTeacher() {
-        // Get the configuration from the TimeTable's constraint configuration
-        return TimeTableConstraintConfig.getMaxPeriodsPerTeacher();
     }
 }

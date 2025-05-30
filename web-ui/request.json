@@ -52,39 +52,39 @@
     }
   ],
   "teacherWorkloadConfig": {
-    "totalTimeslotsPerWeek": 20,
+    "totalTimeslotsPerWeek": 160,
     "freePeriodsPerTeacherPerWeek": 10,
-    "maxPeriodsPerTeacherPerWeek": 30
+    "maxPeriodsPerTeacherPerWeek": 40
   },
   "subjectList": [
-    "Math", "English", "Chemistry", "Physics"
+    "Mathematics", "English", "Chemistry", "Physics"
   ],
   "lessonAssignmentList": [
     {
       "subject": "Mathematics",
       "grade": "12",
-      "possibleTeachers": ["Tharindu Silva", "Malinda Perera","Namal"],
+      "possibleTeachers": ["Tharindu Silva", "Malinda Perera", "Namal Udugama", "Sandun Balasuriya"],
       "periodsPerWeek": 10,
       "maxPeriodsPerDay": 2
     },
     {
       "subject": "English",
       "grade": "12",
-      "possibleTeachers": ["William Shakespeare", "Jane Austen", "Isuru Somarathne"],
+      "possibleTeachers": ["William Shakespeare", "Jane Austen", "Isuru Somarathne", "Janani Rathanapitiya"],
       "periodsPerWeek": 10,
       "maxPeriodsPerDay": 2
     },
     {
       "subject": "Chemistry",
       "grade": "12",
-      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier","Denso Kobbakaduwa"],
+      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier","Denso Kobbakaduwa", "Nadun Rajakaruna"],
       "periodsPerWeek": 10,
       "maxPeriodsPerDay": 2
     },
     {
       "subject": "Physics",
       "grade": "12",
-      "possibleTeachers": ["Albert Einstein", "Isaac Newton","Darshana Ukuwela"],
+      "possibleTeachers": ["Albert Einstein", "Isaac Newton","Darshana Ukuwela","Nimal Hettiarachchi"],
       "periodsPerWeek": 10,
       "maxPeriodsPerDay": 2
     }
