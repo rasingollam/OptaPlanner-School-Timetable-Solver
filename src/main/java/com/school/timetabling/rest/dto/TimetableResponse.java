@@ -1,5 +1,6 @@
 package com.school.timetabling.rest.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,9 @@ public class TimetableResponse {
     private Map<String, Integer> teacherWorkloadSummary;
     private String message;
     private UnassignedSummary unassignedSummary;
+
+    // Add new fields for feasibility analysis
+    private FeasibilityAnalysis feasibilityAnalysis;
 
     public TimetableResponse() {}
 
@@ -78,6 +82,79 @@ public class TimetableResponse {
 
     public void setUnassignedSummary(UnassignedSummary unassignedSummary) {
         this.unassignedSummary = unassignedSummary;
+    }
+
+    public FeasibilityAnalysis getFeasibilityAnalysis() {
+        return feasibilityAnalysis;
+    }
+
+    public void setFeasibilityAnalysis(FeasibilityAnalysis feasibilityAnalysis) {
+        this.feasibilityAnalysis = feasibilityAnalysis;
+    }
+
+    // Add nested classes for feasibility analysis
+    public static class FeasibilityAnalysis {
+        private boolean feasible;
+        private int totalHardViolations;
+        private int totalSoftViolations;
+        private List<ConstraintViolation> hardConstraintViolations = new ArrayList<>();
+        private List<String> recommendedActions = new ArrayList<>();
+        private String summary;
+
+        // Getters and setters
+        public boolean isFeasible() { return feasible; }
+        public void setFeasible(boolean feasible) { this.feasible = feasible; }
+
+        public int getTotalHardViolations() { return totalHardViolations; }
+        public void setTotalHardViolations(int totalHardViolations) { this.totalHardViolations = totalHardViolations; }
+
+        public int getTotalSoftViolations() { return totalSoftViolations; }
+        public void setTotalSoftViolations(int totalSoftViolations) { this.totalSoftViolations = totalSoftViolations; }
+
+        public List<ConstraintViolation> getHardConstraintViolations() { return hardConstraintViolations; }
+        public void setHardConstraintViolations(List<ConstraintViolation> hardConstraintViolations) { this.hardConstraintViolations = hardConstraintViolations; }
+
+        public List<String> getRecommendedActions() { return recommendedActions; }
+        public void setRecommendedActions(List<String> recommendedActions) { this.recommendedActions = recommendedActions; }
+
+        public String getSummary() { return summary; }
+        public void setSummary(String summary) { this.summary = summary; }
+    }
+
+    public static class ConstraintViolation {
+        private String constraintName;
+        private String description;
+        private int violationCount;
+        private List<String> affectedEntities = new ArrayList<>();
+        private String suggestedFix;
+        private String severity;
+
+        public ConstraintViolation() {}
+
+        public ConstraintViolation(String constraintName, String description, int violationCount) {
+            this.constraintName = constraintName;
+            this.description = description;
+            this.violationCount = violationCount;
+        }
+
+        // Getters and setters
+        public String getConstraintName() { return constraintName; }
+        public void setConstraintName(String constraintName) { this.constraintName = constraintName; }
+
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+
+        public int getViolationCount() { return violationCount; }
+        public void setViolationCount(int violationCount) { this.violationCount = violationCount; }
+
+        public List<String> getAffectedEntities() { return affectedEntities; }
+        public void setAffectedEntities(List<String> affectedEntities) { this.affectedEntities = affectedEntities; }
+
+        public String getSuggestedFix() { return suggestedFix; }
+        public void setSuggestedFix(String suggestedFix) { this.suggestedFix = suggestedFix; }
+
+        public String getSeverity() { return severity; }
+        public void setSeverity(String severity) { this.severity = severity; }
     }
 
     public static class StudentGroupSchedule {

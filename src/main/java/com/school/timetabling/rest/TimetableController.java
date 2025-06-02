@@ -7,6 +7,7 @@ import com.school.timetabling.domain.StudentGroup;
 import com.school.timetabling.rest.dto.TimetableRequest;
 import com.school.timetabling.rest.dto.TimetableResponse;
 import com.school.timetabling.service.TimeTableService;
+import com.school.timetabling.service.FeasibilityAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,9 @@ public class TimetableController {
 
     @Autowired
     private TimeTableService timeTableService;
+    
+    @Autowired
+    private FeasibilityAnalysisService feasibilityAnalysisService;
 
     @PostMapping("/solve")
     public ResponseEntity<TimetableResponse> solveTimetable(@RequestBody TimetableRequest request) {
@@ -44,6 +48,11 @@ public class TimetableController {
             // Calculate teacher workload summary
             Map<String, Integer> teacherWorkload = calculateTeacherWorkload(solution);
             response.setTeacherWorkloadSummary(teacherWorkload);
+
+            // Generate feasibility analysis
+            TimetableResponse.FeasibilityAnalysis feasibilityAnalysis = 
+                feasibilityAnalysisService.analyzeFeasibility(solution, request);
+            response.setFeasibilityAnalysis(feasibilityAnalysis);
 
             // Generate unassigned summary
             TimetableResponse.UnassignedSummary summary = generateUnassignedSummary(detailedUnassignedPeriods, request);

@@ -220,6 +220,9 @@ function displayResults(data) {
     // Display score and feasibility
     displayScore(data);
     
+    // Display feasibility analysis if available
+    displayFeasibilityAnalysis(data.feasibilityAnalysis);
+    
     // Populate class selector
     populateClassSelector(data.studentGroupSchedules);
     
@@ -233,13 +236,30 @@ function displayResults(data) {
     displayDetailedUnassignedPeriods(data);
 }
 
+function displayScore(data) {
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const feasibilityBadge = document.getElementById('feasibilityBadge');
+    
+    // Display score
+    scoreDisplay.textContent = data.score || 'N/A';
+    
+    // Display feasibility
+    if (data.feasible) {
+        feasibilityBadge.innerHTML = '<span class="badge bg-success">Feasible</span>';
+        scoreDisplay.className = 'h3 score-good';
+    } else {
+        feasibilityBadge.innerHTML = '<span class="badge bg-danger">Not Feasible</span>';
+        scoreDisplay.className = 'h3 score-warning';
+    }
+}
+
 function extractSubjectsFromResponse(data) {
     const subjects = new Set();
     
     if (data.studentGroupSchedules) {
-        Object.values(data.studentGroupSchedules).forEach(classSchedule => {
-            if (classSchedule.weekSchedule) {
-                Object.values(classSchedule.weekSchedule).forEach(daySchedule => {
+        Object.values(data.studentGroupSchedules).forEach(classData => {
+            if (classData.weekSchedule) {
+                Object.values(classData.weekSchedule).forEach(daySchedule => {
                     Object.values(daySchedule).forEach(lesson => {
                         if (lesson.subject) {
                             subjects.add(lesson.subject);
@@ -253,452 +273,492 @@ function extractSubjectsFromResponse(data) {
     return Array.from(subjects).sort();
 }
 
-function displayScore(data) {
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const feasibilityBadge = document.getElementById('feasibilityBadge');
-    
-    scoreDisplay.textContent = data.score;
-    
-    if (data.feasible) {
-        scoreDisplay.className = 'h3 score-good';
-        feasibilityBadge.innerHTML = '<span class="badge bg-success">Feasible</span>';
-    } else {
-        scoreDisplay.className = 'h3 score-danger';
-        feasibilityBadge.innerHTML = '<span class="badge bg-danger">Not Feasible</span>';
-    }
-}
-
 function populateClassSelector(studentGroupSchedules) {
-    const selector = document.getElementById('classSelect');
-    selector.innerHTML = '<option value="">Choose a class...</option>';
+    const classSelect = document.getElementById('classSelect');
+    classSelect.innerHTML = '<option value="">Choose a class...</option>';
     
-    if (!studentGroupSchedules) return;
-    
-    Object.keys(studentGroupSchedules).sort().forEach(className => {
-        const option = document.createElement('option');
-        option.value = className;
-        option.textContent = className;
-        selector.appendChild(option);
-    });
+    if (studentGroupSchedules) {
+        Object.keys(studentGroupSchedules).sort().forEach(className => {
+            const option = document.createElement('option');
+            option.value = className;
+            option.textContent = className;
+            classSelect.appendChild(option);
+        });
+        
+        // Auto-select first class if available
+        const firstClass = Object.keys(studentGroupSchedules)[0];
+        if (firstClass) {
+            classSelect.value = firstClass;
+            displayTimetable();
+        }
+    }
 }
 
 function displayTimetable() {
-    const selector = document.getElementById('classSelect');
-    const display = document.getElementById('timetableDisplay');
+    const classSelect = document.getElementById('classSelect');
+    const selectedClass = classSelect.value;
+    const timetableDisplay = document.getElementById('timetableDisplay');
     
-    if (!selector.value || !currentTimetableData) {
-        display.innerHTML = '';
+    if (!selectedClass || !currentTimetableData || !currentTimetableData.studentGroupSchedules) {
+        timetableDisplay.innerHTML = '<p class="text-muted">Please select a class to view the timetable.</p>';
         return;
     }
     
-    const classSchedule = currentTimetableData.studentGroupSchedules[selector.value];
-    if (!classSchedule || !classSchedule.weekSchedule) {
-        display.innerHTML = '<p class="text-muted">No schedule available for this class.</p>';
+    const classData = currentTimetableData.studentGroupSchedules[selectedClass];
+    if (!classData || !classData.weekSchedule) {
+        timetableDisplay.innerHTML = '<p class="text-muted">No schedule data available for this class.</p>';
         return;
     }
     
-    const subjects = extractSubjectsFromResponse(currentTimetableData);
-    display.innerHTML = generateTimetableHTML(selector.value, classSchedule.weekSchedule, subjects);
-}
-
-function generateTimetableHTML(className, weekSchedule, subjects) {
-    // Use dynamic days and time slots if available, otherwise fall back to defaults
-    const days = availableDays.length > 0 ? availableDays : ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
-    const timeSlots = availableTimeSlots.length > 0 ? availableTimeSlots : ['07:50:00', '08:30:00', '09:10:00', '09:50:00', '10:50:00', '11:30:00', '12:10:00', '12:50:00'];
+    // Extract subjects for this class
+    const classSubjects = extractSubjectsFromClassData(classData);
     
+    // Generate timetable HTML
     let html = `
-        <div class="class-header">
-            <i class="fas fa-users me-2"></i>
-            Class ${className} - Weekly Timetable
-        </div>
-        ${createSubjectLegend(subjects)}
-        <div class="timetable-grid">
-            <table class="table table-bordered timetable-table mb-0">
-                <thead>
+        ${createSubjectLegend(classSubjects)}
+        <div class="table-responsive">
+            <table class="table table-bordered timetable-table">
+                <thead class="table-dark">
                     <tr>
-                        <th style="width: 100px;">Time</th>
+                        <th>Time</th>
+                        ${generateDayHeaders(classData.weekSchedule)}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${generateTimetableRows(classData.weekSchedule)}
+                </tbody>
+            </table>
+        </div>
     `;
     
-    days.forEach(day => {
-        html += `<th class="day-header">${day}</th>`;
-    });
-    html += '</tr></thead><tbody>';
+    timetableDisplay.innerHTML = html;
+}
+
+function extractSubjectsFromClassData(classData) {
+    const subjects = new Set();
     
-    timeSlots.forEach(timeSlot => {
-        // Handle both time formats (with and without seconds)
-        const timeKey = timeSlot.length === 5 ? timeSlot : timeSlot.substring(0, 5);
-        html += `<tr><td class="time-slot">${timeKey}</td>`;
+    if (classData.weekSchedule) {
+        Object.values(classData.weekSchedule).forEach(daySchedule => {
+            Object.values(daySchedule).forEach(lesson => {
+                if (lesson.subject) {
+                    subjects.add(lesson.subject);
+                }
+            });
+        });
+    }
+    
+    return Array.from(subjects).sort();
+}
+
+function generateDayHeaders(weekSchedule) {
+    const days = Object.keys(weekSchedule).sort();
+    return days.map(day => `<th>${day}</th>`).join('');
+}
+
+function generateTimetableRows(weekSchedule) {
+    // Get all unique time slots across all days
+    const timeSlots = new Set();
+    Object.values(weekSchedule).forEach(daySchedule => {
+        Object.keys(daySchedule).forEach(time => {
+            timeSlots.add(normalizeTime(time));
+        });
+    });
+    
+    // Sort time slots
+    const sortedTimeSlots = Array.from(timeSlots).sort();
+    const days = Object.keys(weekSchedule).sort();
+    
+    return sortedTimeSlots.map(timeSlot => {
+        let row = `<tr><td class="time-slot"><strong>${timeSlot}</strong></td>`;
         
         days.forEach(day => {
-            // Try both time formats when looking for lessons
-            const lesson = weekSchedule[day] && (
-                weekSchedule[day][timeSlot] || 
-                weekSchedule[day][timeKey] ||
-                weekSchedule[day][timeSlot + ':00']
-            );
+            const daySchedule = weekSchedule[day] || {};
+            const lesson = findLessonByTime(daySchedule, timeSlot);
             
             if (lesson) {
-                const subjectColorClass = getSubjectColorClass(lesson.subject);
-                const startTime = lesson.startTime ? lesson.startTime.substring(0, 5) : timeKey;
-                const endTime = lesson.endTime ? lesson.endTime.substring(0, 5) : '';
-                
-                html += `
-                    <td>
-                        <div class="lesson-card ${subjectColorClass}">
-                            <div class="subject-name">${lesson.subject}</div>
-                            <div class="teacher-name">${lesson.teacher}</div>
-                            <div class="time-display">${startTime}${endTime ? ` - ${endTime}` : ''}</div>
+                const colorClass = getSubjectColorClass(lesson.subject);
+                row += `
+                    <td class="lesson-cell ${colorClass}">
+                        <div class="lesson-content">
+                            <div class="subject">${lesson.subject}</div>
+                            <div class="teacher">${lesson.teacher || 'N/A'}</div>
+                            <small class="time-range">${lesson.startTime}-${lesson.endTime}</small>
                         </div>
                     </td>
                 `;
             } else {
-                html += '<td class="empty-slot">Free Period</td>';
+                row += '<td class="empty-cell">-</td>';
             }
         });
         
-        html += '</tr>';
-    });
-    
-    html += '</tbody></table></div>';
-    
-    // Add class summary table
-    html += generateClassSummaryTable(className, weekSchedule);
-    
-    return html;
+        row += '</tr>';
+        return row;
+    }).join('');
 }
 
-function generateClassSummaryTable(className, weekSchedule) {
-    // Count assigned periods per subject for this class
-    const assignedPeriods = {};
-    
-    // Count periods from the actual schedule
-    Object.values(weekSchedule).forEach(daySchedule => {
-        Object.values(daySchedule).forEach(lesson => {
-            if (lesson && lesson.subject) {
-                assignedPeriods[lesson.subject] = (assignedPeriods[lesson.subject] || 0) + 1;
-            }
-        });
-    });
-    
-    // Get expected periods from original request data
-    const expectedPeriods = {};
-    
-    if (currentRequestData && currentRequestData.lessonAssignmentList) {
-        // Extract grade from className (e.g., "10A" -> grade "10")
-        const grade = className.replace(/[A-Z]/g, '');
-        
-        currentRequestData.lessonAssignmentList.forEach(assignment => {
-            if (assignment.grade === grade) {
-                expectedPeriods[assignment.subject] = assignment.periodsPerWeek;
-            }
-        });
+function normalizeTime(time) {
+    // Handle both "07:50" and "07:50:00" formats
+    if (time.length === 5) {
+        return time + ':00';
+    }
+    return time;
+}
+
+function findLessonByTime(daySchedule, targetTime) {
+    // Try exact match first
+    if (daySchedule[targetTime]) {
+        return daySchedule[targetTime];
     }
     
-    // Get all subjects (both assigned and expected)
-    const allSubjects = new Set([
-        ...Object.keys(assignedPeriods),
-        ...Object.keys(expectedPeriods)
-    ]);
-    
-    if (allSubjects.size === 0) {
-        return '<div class="mt-3"><p class="text-muted">No subject data available for summary.</p></div>';
+    // Try without seconds
+    const timeWithoutSeconds = targetTime.substring(0, 5);
+    if (daySchedule[timeWithoutSeconds]) {
+        return daySchedule[timeWithoutSeconds];
     }
     
-    let html = `
-        <div class="mt-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>
-                        Class ${className} - Subject Summary
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Subject</th>
-                                    <th class="text-center">Periods Needed</th>
-                                    <th class="text-center">Assigned Periods</th>
-                                    <th class="text-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-    `;
-    
-    // Sort subjects alphabetically
-    Array.from(allSubjects).sort().forEach(subject => {
-        const needed = expectedPeriods[subject] || 0;
-        const assigned = assignedPeriods[subject] || 0;
-        const subjectColorClass = getSubjectColorClass(subject);
-        
-        // Determine status
-        let statusBadge;
-        let statusClass;
-        
-        if (assigned === needed && needed > 0) {
-            statusBadge = 'Complete';
-            statusClass = 'bg-success';
-        } else if (assigned > needed) {
-            statusBadge = 'Over-assigned';
-            statusClass = 'bg-info';
-        } else if (needed === 0) {
-            statusBadge = 'Not Required';
-            statusClass = 'bg-secondary';
-        } else {
-            statusBadge = 'Incomplete';
-            statusClass = 'bg-warning';
+    // Try finding by startTime property
+    for (const [key, lesson] of Object.entries(daySchedule)) {
+        if (lesson.startTime && normalizeTime(lesson.startTime) === targetTime) {
+            return lesson;
         }
-        
-        html += `
-            <tr>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="legend-color ${subjectColorClass} me-2" style="width: 16px; height: 16px; border-radius: 3px;"></div>
-                        <strong>${subject}</strong>
-                    </div>
-                </td>
-                <td class="text-center">
-                    <span class="badge bg-secondary">${needed}</span>
-                </td>
-                <td class="text-center">
-                    <span class="badge ${assigned === needed ? 'bg-success' : assigned > needed ? 'bg-info' : 'bg-primary'}">${assigned}</span>
-                </td>
-                <td class="text-center">
-                    <span class="badge ${statusClass}">${statusBadge}</span>
-                </td>
-            </tr>
-        `;
-    });
+    }
     
-    // Add totals row
-    const totalNeeded = Object.values(expectedPeriods).reduce((sum, val) => sum + val, 0);
-    const totalAssigned = Object.values(assignedPeriods).reduce((sum, val) => sum + val, 0);
-    
-    html += `
-                <tr class="table-secondary fw-bold">
-                    <td><strong>TOTAL</strong></td>
-                    <td class="text-center"><span class="badge bg-dark">${totalNeeded}</span></td>
-                    <td class="text-center"><span class="badge bg-dark">${totalAssigned}</span></td>
-                    <td class="text-center">
-                        <span class="badge ${totalAssigned === totalNeeded ? 'bg-success' : 'bg-warning'}">
-                            ${totalAssigned === totalNeeded ? 'Complete' : 'Incomplete'}
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    `;
-    
-    // Add completion percentage
-    const completionPercentage = totalNeeded > 0 ? Math.round((totalAssigned / totalNeeded) * 100) : 100;
-    
-    html += `
-                    <div class="mt-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <small class="text-muted">Schedule Completion</small>
-                            <small class="fw-bold">${completionPercentage}%</small>
-                        </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar ${completionPercentage === 100 ? 'bg-success' : completionPercentage >= 75 ? 'bg-info' : 'bg-warning'}" 
-                                 style="width: ${completionPercentage}%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    return html;
+    return null;
 }
 
-function displayTeacherWorkload(workloadSummary) {
+function displayTeacherWorkload(teacherWorkloadSummary) {
     const container = document.getElementById('teacherWorkload');
     
-    if (!workloadSummary || Object.keys(workloadSummary).length === 0) {
+    if (!teacherWorkloadSummary || Object.keys(teacherWorkloadSummary).length === 0) {
         container.innerHTML = '<p class="text-muted">No teacher workload data available.</p>';
         return;
     }
     
-    // Get max workload from the original request data instead of hardcoded value
-    let maxWorkload = 20; // Default fallback
+    // Get max periods from current request or use reasonable default
+    const maxPeriodsPerTeacher = currentRequestData?.teacherWorkloadConfig?.maxPeriodsPerTeacherPerWeek || 40;
     
-    if (currentRequestData && 
-        currentRequestData.teacherWorkloadConfig && 
-        currentRequestData.teacherWorkloadConfig.maxPeriodsPerTeacherPerWeek) {
-        maxWorkload = currentRequestData.teacherWorkloadConfig.maxPeriodsPerTeacherPerWeek;
-        console.log('Using maxPeriodsPerTeacherPerWeek from request:', maxWorkload);
-    } else {
-        console.warn('No teacherWorkloadConfig.maxPeriodsPerTeacherPerWeek found in request, using default:', maxWorkload);
-    }
+    // Sort teachers by workload (descending)
+    const sortedTeachers = Object.entries(teacherWorkloadSummary)
+        .sort(([,a], [,b]) => b - a);
     
-    // Categorize teachers by subjects they teach
-    const teachersBySubject = categorizeTeachersBySubject(workloadSummary);
+    let html = `
+        <div class="workload-summary mb-4">
+            <h6 class="mb-3">
+                <i class="fas fa-chart-bar me-2"></i>
+                Teacher Workload Distribution
+            </h6>
+            <div class="row">
+    `;
     
-    let html = '';
-    
-    // Display each subject category
-    Object.entries(teachersBySubject).forEach(([subject, teachers]) => {
-        const subjectColorClass = getSubjectColorClass(subject);
+    sortedTeachers.forEach(([teacher, periods]) => {
+        const utilization = (periods / maxPeriodsPerTeacher) * 100;
+        const progressClass = utilization >= 90 ? 'bg-danger' : 
+                            utilization >= 75 ? 'bg-warning' : 'bg-success';
         
         html += `
-            <div class="mb-4">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="legend-color ${subjectColorClass} me-2" style="width: 20px; height: 20px; border-radius: 4px;"></div>
-                    <h6 class="mb-0">${subject} Teachers</h6>
-                    <span class="badge bg-secondary ms-2">${teachers.length} teachers</span>
-                </div>
-                <div class="row">
-        `;
-        
-        teachers.forEach((teacher, index) => {
-            const workload = workloadSummary[teacher];
-            const percentage = Math.min((workload / maxWorkload) * 100, 100);
-            
-            // Determine workload status based on the actual maxWorkload from request
-            let workloadStatus;
-            let statusClass;
-            if (workload > maxWorkload) {
-                workloadStatus = 'Overloaded';
-                statusClass = 'text-danger';
-            } else if (workload > maxWorkload * 0.75) {
-                workloadStatus = 'Heavy Load';
-                statusClass = 'text-warning';
-            } else {
-                workloadStatus = 'Normal Load';
-                statusClass = 'text-success';
-            }
-            
-            html += `
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title mb-3">${teacher}</h6>
-                            <div class="workload-bar">
-                                <div class="workload-fill" style="width: ${percentage}%"></div>
-                                <div class="workload-text">${workload}/${maxWorkload}</div>
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title text-truncate" title="${teacher}">${teacher}</h6>
+                        <div class="progress mb-2" style="height: 20px;">
+                            <div class="progress-bar ${progressClass}" role="progressbar" 
+                                 style="width: ${utilization}%" 
+                                 aria-valuenow="${utilization}" aria-valuemin="0" aria-valuemax="100">
+                                ${utilization.toFixed(1)}%
                             </div>
-                            <small class="${statusClass} mt-1 d-block">
-                                ${workloadStatus}
-                            </small>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Periods:</small>
+                            <small><strong>${periods}/${maxPeriodsPerTeacher}</strong></small>
                         </div>
                     </div>
-                </div>
-            `;
-        });
-        
-        html += `
                 </div>
             </div>
         `;
     });
     
-    // If there are teachers not assigned to any subject, show them separately
-    const assignedTeachers = new Set(Object.values(teachersBySubject).flat());
-    const unassignedTeachers = Object.keys(workloadSummary).filter(teacher => !assignedTeachers.has(teacher));
+    html += '</div></div>';
+    container.innerHTML = html;
+}
+
+function displayFeasibilityAnalysis(feasibilityAnalysis) {
+    const container = document.getElementById('feasibilityAnalysis');
     
-    if (unassignedTeachers.length > 0) {
-        html += `
-            <div class="mb-4">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="legend-color bg-secondary me-2" style="width: 20px; height: 20px; border-radius: 4px;"></div>
-                    <h6 class="mb-0">Other Teachers</h6>
-                    <span class="badge bg-secondary ms-2">${unassignedTeachers.length} teachers</span>
-                </div>
-                <div class="row">
-        `;
-        
-        unassignedTeachers.forEach(teacher => {
-            const workload = workloadSummary[teacher];
-            const percentage = Math.min((workload / maxWorkload) * 100, 100);
-            
-            let workloadStatus;
-            let statusClass;
-            if (workload > maxWorkload) {
-                workloadStatus = 'Overloaded';
-                statusClass = 'text-danger';
-            } else if (workload > maxWorkload * 0.75) {
-                workloadStatus = 'Heavy Load';
-                statusClass = 'text-warning';
-            } else {
-                workloadStatus = 'Normal Load';
-                statusClass = 'text-success';
-            }
-            
-            html += `
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title mb-3">${teacher}</h6>
-                            <div class="workload-bar">
-                                <div class="workload-fill" style="width: ${percentage}%"></div>
-                                <div class="workload-text">${workload}/${maxWorkload}</div>
-                            </div>
-                            <small class="${statusClass} mt-1 d-block">
-                                ${workloadStatus}
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += `
-                </div>
+    if (!feasibilityAnalysis) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    if (feasibilityAnalysis.feasible) {
+        container.innerHTML = `
+            <div class="alert alert-success">
+                <h6><i class="fas fa-check-circle me-2"></i>Timetable is Feasible</h6>
+                <p class="mb-0">${feasibilityAnalysis.summary}</p>
             </div>
         `;
+        return;
     }
+    
+    // Display detailed feasibility analysis for infeasible solutions
+    let html = `
+        <div class="card border-danger">
+            <div class="card-header bg-danger bg-opacity-10">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Feasibility Analysis
+                    </h6>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="exportFeasibilityReport()">
+                            <i class="fas fa-download me-1"></i>Export Report
+                        </button>
+                        <span class="badge bg-danger">${feasibilityAnalysis.totalHardViolations} violations</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <p class="mb-0">${feasibilityAnalysis.summary}</p>
+                </div>
+                
+                ${generateViolationsAccordion(feasibilityAnalysis.hardConstraintViolations)}
+                
+                ${generateRecommendationsSection(feasibilityAnalysis.recommendedActions)}
+            </div>
+        </div>
+    `;
     
     container.innerHTML = html;
 }
 
-function categorizeTeachersBySubject(workloadSummary) {
-    const teachersBySubject = {};
-    
-    // Check if we have the original request data to categorize teachers
-    if (!currentRequestData || !currentRequestData.lessonAssignmentList) {
-        // If no request data, return all teachers under "All Teachers"
-        teachersBySubject['All Teachers'] = Object.keys(workloadSummary);
-        return teachersBySubject;
+function generateViolationsAccordion(violations) {
+    if (!violations || violations.length === 0) {
+        return '<p class="text-muted">No constraint violations detected.</p>';
     }
     
-    // Map teachers to subjects based on the original request
-    currentRequestData.lessonAssignmentList.forEach(assignment => {
-        const subject = assignment.subject;
-        const possibleTeachers = assignment.possibleTeachers;
+    let html = `
+        <div class="mb-4">
+            <h6 class="mb-3">
+                <i class="fas fa-list-alt me-2"></i>
+                Constraint Violations Details
+            </h6>
+            <div class="accordion" id="violationsAccordion">
+    `;
+    
+    violations.forEach((violation, index) => {
+        const collapseId = `violation-${index}`;
+        const severityClass = getSeverityClass(violation.severity);
+        const severityIcon = getSeverityIcon(violation.severity);
         
-        if (!teachersBySubject[subject]) {
-            teachersBySubject[subject] = [];
-        }
-        
-        possibleTeachers.forEach(teacher => {
-            // Only add teachers that actually have workload (i.e., were assigned lessons)
-            if (workloadSummary[teacher] && workloadSummary[teacher] > 0) {
-                if (!teachersBySubject[subject].includes(teacher)) {
-                    teachersBySubject[subject].push(teacher);
-                }
-            }
-        });
+        html += `
+            <div class="accordion-item border-${severityClass}">
+                <h2 class="accordion-header">
+                    <button class="accordion-button ${index === 0 ? '' : 'collapsed'}" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#${collapseId}">
+                        <div class="d-flex align-items-center w-100">
+                            <i class="${severityIcon} text-${severityClass} me-2"></i>
+                            <strong class="me-auto">${violation.constraintName}</strong>
+                            <div class="ms-3">
+                                <span class="badge bg-${severityClass} me-2">${violation.severity}</span>
+                                <span class="badge bg-secondary">${violation.violationCount} violations</span>
+                            </div>
+                        </div>
+                    </button>
+                </h2>
+                <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" 
+                     data-bs-parent="#violationsAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-2">Description</h6>
+                                <p>${violation.description}</p>
+                                
+                                <h6 class="text-muted mb-2">Suggested Solution</h6>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    ${violation.suggestedFix}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-2">Affected Entities</h6>
+                                ${generateAffectedEntitiesList(violation.affectedEntities)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     });
     
-    // Remove empty subject categories
-    Object.keys(teachersBySubject).forEach(subject => {
-        if (teachersBySubject[subject].length === 0) {
-            delete teachersBySubject[subject];
-        }
-    });
-    
-    // Sort teachers within each subject by workload (descending)
-    Object.keys(teachersBySubject).forEach(subject => {
-        teachersBySubject[subject].sort((a, b) => (workloadSummary[b] || 0) - (workloadSummary[a] || 0));
-    });
-    
-    return teachersBySubject;
+    html += '</div></div>';
+    return html;
 }
 
-// ...existing code...
+function generateAffectedEntitiesList(affectedEntities) {
+    if (!affectedEntities || affectedEntities.length === 0) {
+        return '<p class="text-muted">No specific entities affected.</p>';
+    }
+    
+    let html = '<div class="list-group list-group-flush">';
+    
+    affectedEntities.slice(0, 10).forEach(entity => {
+        html += `
+            <div class="list-group-item list-group-item-action py-2">
+                <small>${entity}</small>
+            </div>
+        `;
+    });
+    
+    if (affectedEntities.length > 10) {
+        html += `
+            <div class="list-group-item text-center">
+                <small class="text-muted">
+                    ... and ${affectedEntities.length - 10} more entities
+                </small>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    return html;
+}
+
+function generateRecommendationsSection(recommendations) {
+    if (!recommendations || recommendations.length === 0) {
+        return '';
+    }
+    
+    let html = `
+        <div class="mt-4">
+            <h6 class="mb-3">
+                <i class="fas fa-tools me-2"></i>
+                Recommended Actions
+            </h6>
+            <div class="row">
+    `;
+    
+    recommendations.forEach((recommendation, index) => {
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                <span class="text-success fw-bold">${index + 1}</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-0">${recommendation}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div></div>';
+    return html;
+}
+
+function getSeverityClass(severity) {
+    switch (severity?.toUpperCase()) {
+        case 'HIGH': return 'danger';
+        case 'MEDIUM': return 'warning';
+        case 'LOW': return 'info';
+        default: return 'secondary';
+    }
+}
+
+function getSeverityIcon(severity) {
+    switch (severity?.toUpperCase()) {
+        case 'HIGH': return 'fas fa-exclamation-triangle';
+        case 'MEDIUM': return 'fas fa-exclamation-circle';
+        case 'LOW': return 'fas fa-info-circle';
+        default: return 'fas fa-question-circle';
+    }
+}
+
+function exportFeasibilityReport() {
+    if (!currentTimetableData || !currentTimetableData.feasibilityAnalysis) {
+        showApiStatus('No feasibility analysis data available for export', 'warning');
+        return;
+    }
+    
+    const analysis = currentTimetableData.feasibilityAnalysis;
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    
+    // Generate detailed report
+    const report = {
+        metadata: {
+            exportDate: new Date().toISOString(),
+            timetableFeasible: analysis.feasible,
+            totalHardViolations: analysis.totalHardViolations,
+            totalSoftViolations: analysis.totalSoftViolations,
+            score: currentTimetableData.score
+        },
+        summary: analysis.summary,
+        violations: analysis.hardConstraintViolations.map(violation => ({
+            constraintName: violation.constraintName,
+            severity: violation.severity,
+            violationCount: violation.violationCount,
+            description: violation.description,
+            suggestedFix: violation.suggestedFix,
+            affectedEntities: violation.affectedEntities
+        })),
+        recommendations: analysis.recommendedActions,
+        teacherWorkload: currentTimetableData.teacherWorkloadSummary,
+        unassignedSummary: currentTimetableData.unassignedSummary
+    };
+    
+    // Create downloadable JSON file
+    const blob = new Blob([JSON.stringify(report, null, 2)], { 
+        type: 'application/json' 
+    });
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `timetable-feasibility-report-${timestamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showApiStatus('Feasibility report exported successfully', 'success');
+}
+
+function exportTimetableAsCSV() {
+    if (!currentTimetableData || !currentTimetableData.studentGroupSchedules) {
+        showApiStatus('No timetable data available for export', 'warning');
+        return;
+    }
+    
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    let csvContent = 'Class,Day,Time,Subject,Teacher,Duration\n';
+    
+    Object.entries(currentTimetableData.studentGroupSchedules).forEach(([className, classData]) => {
+        if (classData.weekSchedule) {
+            Object.entries(classData.weekSchedule).forEach(([day, daySchedule]) => {
+                Object.entries(daySchedule).forEach(([time, lesson]) => {
+                    const duration = lesson.endTime ? `${lesson.startTime}-${lesson.endTime}` : lesson.startTime;
+                    csvContent += `"${className}","${day}","${time}","${lesson.subject}","${lesson.teacher || 'N/A'}","${duration}"\n`;
+                });
+            });
+        }
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `timetable-${timestamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showApiStatus('Timetable exported as CSV successfully', 'success');
+}
 
 function displayUnassignedSummary(unassignedSummary) {
     const countDisplay = document.getElementById('unassignedCount');
@@ -751,25 +811,18 @@ function calculateAffectedClasses(unassignedPeriods) {
 function displayDetailedUnassignedPeriods(data) {
     const container = document.getElementById('teacherWorkload');
     
-    // Debug: Check what data we're receiving
-    console.log('=== Unassigned Periods Debug ===');
-    console.log('Full data object:', data);
-    console.log('unassignedSummary:', data.unassignedSummary);
-    console.log('unassignedPeriods:', data.unassignedPeriods);
-    console.log('detailedUnassignedPeriods:', data.detailedUnassignedPeriods);
-    
-    // Check for unassigned data in multiple possible locations
+    // Check for unassigned data
     const hasUnassignedSummary = data.unassignedSummary && data.unassignedSummary.totalUnassignedPeriods > 0;
     const hasUnassignedPeriods = data.unassignedPeriods && Object.keys(data.unassignedPeriods).length > 0;
     const hasDetailedUnassigned = data.detailedUnassignedPeriods && Object.keys(data.detailedUnassignedPeriods).length > 0;
     
-    console.log('hasUnassignedSummary:', hasUnassignedSummary);
-    console.log('hasUnassignedPeriods:', hasUnassignedPeriods);
-    console.log('hasDetailedUnassigned:', hasDetailedUnassigned);
-    
     const hasUnassignedData = hasUnassignedSummary || hasUnassignedPeriods || hasDetailedUnassigned;
     
-    console.log('Final hasUnassignedData:', hasUnassignedData);
+    // Get existing teacher workload HTML
+    const existingHTML = container.innerHTML;
+    
+    // Add class assignment summary
+    const classAssignmentSummary = generateClassAssignmentSummary(data);
     
     if (hasUnassignedData) {
         const unassignedSection = `
@@ -788,213 +841,115 @@ function displayDetailedUnassignedPeriods(data) {
             </div>
         `;
         
-        // Get existing teacher workload HTML
-        const existingHTML = container.innerHTML;
-        
-        // Append unassigned section
-        container.innerHTML = existingHTML + unassignedSection;
+        // Combine all sections
+        container.innerHTML = existingHTML + classAssignmentSummary + unassignedSection;
     } else {
-        console.log('No unassigned data found - section will not be displayed');
-        
-        // Add a debug section to show what we received
-        const debugSection = `
-            <div class="mt-4">
-                <div class="card border-info">
-                    <div class="card-header bg-info bg-opacity-10">
-                        <h6 class="mb-0 text-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Debug: Unassigned Data Check
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Data received:</strong></p>
-                        <ul>
-                            <li>unassignedSummary: ${data.unassignedSummary ? JSON.stringify(data.unassignedSummary) : 'null'}</li>
-                            <li>unassignedPeriods: ${data.unassignedPeriods ? JSON.stringify(data.unassignedPeriods) : 'null'}</li>
-                            <li>detailedUnassignedPeriods: ${data.detailedUnassignedPeriods ? JSON.stringify(data.detailedUnassignedPeriods) : 'null'}</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Get existing teacher workload HTML
-        const existingHTML = container.innerHTML;
-        
-        // Append debug section
-        container.innerHTML = existingHTML + debugSection;
+        // Only add class assignment summary if no unassigned data
+        container.innerHTML = existingHTML + classAssignmentSummary;
     }
 }
 
-function generateUnassignedPeriodsHTML(data) {
-    console.log('=== generateUnassignedPeriodsHTML Debug ===');
-    
-    // Use the actual data structure from backend
-    const unassignedPeriods = data.unassignedPeriods || {};
-    const detailedUnassignedPeriods = data.detailedUnassignedPeriods || {};
-    const unassignedSummary = data.unassignedSummary;
-    
-    console.log('Processing unassignedPeriods:', unassignedPeriods);
-    console.log('Processing detailedUnassignedPeriods:', detailedUnassignedPeriods);
-    
-    // Calculate totals from actual data
-    const totalUnassignedPeriods = calculateTotalUnassignedFromData(unassignedPeriods);
-    const totalGrades = Object.keys(unassignedPeriods).length;
-    
-    // Calculate total affected classes from detailed data
-    let totalAffectedClasses = 0;
-    Object.values(detailedUnassignedPeriods).forEach(gradeData => {
-        Object.values(gradeData).forEach(subjectData => {
-            totalAffectedClasses += Object.keys(subjectData).length;
-        });
-    });
-    
-    console.log('Calculated totals:', {
-        totalUnassignedPeriods,
-        totalGrades,
-        totalAffectedClasses
-    });
-    
-    let html = `
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <div class="text-center">
-                    <div class="h4 text-warning">${totalUnassignedPeriods}</div>
-                    <small class="text-muted">Total Unassigned Periods</small>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="text-center">
-                    <div class="h4 text-info">${totalAffectedClasses}</div>
-                    <small class="text-muted">Classes Affected</small>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="text-center">
-                    <div class="h4 text-secondary">${totalGrades}</div>
-                    <small class="text-muted">Grades Affected</small>
-                </div>
-            </div>
-        </div>
-    `;
-
-    if (Object.keys(unassignedPeriods).length > 0) {
-        html += '<div class="accordion" id="unassignedAccordion">';
-        
-        Object.entries(unassignedPeriods).forEach(([grade, gradeSubjects], index) => {
-            const collapseId = `collapse-${grade}`;
-            const isFirstItem = index === 0;
-            
-            // Calculate grade totals
-            const gradeTotal = Object.values(gradeSubjects).reduce((sum, periods) => sum + periods, 0);
-            const gradeAffectedClasses = detailedUnassignedPeriods[grade] ? 
-                Object.values(detailedUnassignedPeriods[grade]).reduce((sum, subjectData) => 
-                    sum + Object.keys(subjectData).length, 0) : 0;
-            
-            html += `
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button ${isFirstItem ? '' : 'collapsed'}" type="button" 
-                                data-bs-toggle="collapse" data-bs-target="#${collapseId}">
-                            <strong>Grade ${grade}</strong>
-                            <span class="ms-auto me-3">
-                                <span class="badge bg-warning">${gradeTotal} periods</span>
-                                <span class="badge bg-info">${gradeAffectedClasses} classes</span>
-                            </span>
-                        </button>
-                    </h2>
-                    <div id="${collapseId}" class="accordion-collapse collapse ${isFirstItem ? 'show' : ''}" 
-                         data-bs-parent="#unassignedAccordion">
-                        <div class="accordion-body">
-                            ${generateGradeBreakdownHTMLFromBackendData(grade, gradeSubjects, detailedUnassignedPeriods[grade] || {})}
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-    } else {
-        html += `
-            <div class="alert alert-info">
-                <h6><i class="fas fa-info-circle me-2"></i>No Unassigned Periods</h6>
-                <p class="mb-0">All requested periods have been successfully assigned to the timetable.</p>
-            </div>
-        `;
-    }
-
-    return html;
-}
-
-function generateGradeBreakdownHTMLFromBackendData(grade, gradeSubjects, detailedGradeData) {
-    let html = '';
-    
-    Object.entries(gradeSubjects).forEach(([subject, totalPeriods]) => {
-        const subjectColorClass = getSubjectColorClass(subject);
-        const subjectDetailedData = detailedGradeData[subject] || {};
-        const affectedClasses = Object.keys(subjectDetailedData);
-        
-        html += `
-            <div class="card mb-3 border-start border-4" style="border-left-color: var(--bs-warning) !important;">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-3">
-                            <div class="d-flex align-items-center">
-                                <div class="legend-color ${subjectColorClass} me-2" style="width: 20px; height: 20px; border-radius: 4px;"></div>
-                                <strong>${subject}</strong>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-muted">Unassigned Periods:</small><br>
-                            <span class="badge bg-secondary">${totalPeriods}</span>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-muted">Classes Affected:</small><br>
-                            <span class="badge bg-warning">${affectedClasses.length}</span>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-muted">Reason:</small><br>
-                            <span class="text-danger small">Teacher capacity limit reached</span>
-                        </div>
-                    </div>
-                    
-                    ${generateClassLevelBreakdownFromBackendData(grade, subject, subjectDetailedData)}
-                </div>
-            </div>
-        `;
-    });
-    
-    return html;
-}
-
-function generateClassLevelBreakdownFromBackendData(grade, subject, subjectDetailedData) {
-    if (!subjectDetailedData || Object.keys(subjectDetailedData).length === 0) {
+function generateClassAssignmentSummary(data) {
+    if (!data.studentGroupSchedules) {
         return '';
     }
     
+    // Calculate assignment statistics
+    const classes = Object.keys(data.studentGroupSchedules);
+    let totalAssignedPeriods = 0;
+    let classBreakdown = [];
+    
+    classes.forEach(className => {
+        const classData = data.studentGroupSchedules[className];
+        let classPeriods = 0;
+        const subjectCounts = {};
+        
+        if (classData.weekSchedule) {
+            Object.values(classData.weekSchedule).forEach(daySchedule => {
+                Object.values(daySchedule).forEach(lesson => {
+                    classPeriods++;
+                    totalAssignedPeriods++;
+                    subjectCounts[lesson.subject] = (subjectCounts[lesson.subject] || 0) + 1;
+                });
+            });
+        }
+        
+        classBreakdown.push({
+            className,
+            periods: classPeriods,
+            subjects: Object.keys(subjectCounts).length,
+            subjectCounts
+        });
+    });
+    
+    // Sort classes by name
+    classBreakdown.sort((a, b) => a.className.localeCompare(b.className));
+    
     let html = `
-        <div class="mt-3">
-            <h6 class="text-muted mb-2">
-                <i class="fas fa-users me-1"></i>
-                Affected Classes Detail:
-            </h6>
-            <div class="row">
+        <div class="mt-4">
+            <div class="card border-success">
+                <div class="card-header bg-success bg-opacity-10">
+                    <h6 class="mb-0 text-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Class Assignment Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="h4 text-success">${classes.length}</div>
+                                <small class="text-muted">Total Classes</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="h4 text-primary">${totalAssignedPeriods}</div>
+                                <small class="text-muted">Assigned Periods</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="h4 text-info">${(totalAssignedPeriods / classes.length).toFixed(1)}</div>
+                                <small class="text-muted">Avg Periods/Class</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
     `;
     
-    Object.entries(subjectDetailedData).forEach(([className, unassignedCount]) => {
-        const fullClassName = `${grade}${className}`;
+    classBreakdown.forEach(classInfo => {
+        const subjectList = Object.entries(classInfo.subjectCounts)
+            .map(([subject, count]) => `${subject} (${count})`)
+            .join(', ');
         
         html += `
-            <div class="col-md-3 mb-2">
-                <div class="card card-body py-2 text-center bg-light">
-                    <div class="fw-bold">${fullClassName}</div>
-                    <small class="text-danger">${unassignedCount} periods unassigned</small>
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100 border-light">
+                    <div class="card-body">
+                        <h6 class="card-title text-primary">${classInfo.className}</h6>
+                        <div class="mb-2">
+                            <small class="text-muted">Periods:</small>
+                            <span class="badge bg-primary ms-1">${classInfo.periods}</span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Subjects:</small>
+                            <span class="badge bg-info ms-1">${classInfo.subjects}</span>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted d-block">Subject breakdown:</small>
+                            <small class="text-secondary">${subjectList}</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
     });
     
     html += `
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -1002,16 +957,50 @@ function generateClassLevelBreakdownFromBackendData(grade, subject, subjectDetai
     return html;
 }
 
-// Add toggle functionality for detailed view
-function toggleUnassignedDetails() {
-    const detailsSection = document.getElementById('unassignedDetails');
-    if (detailsSection) {
-        detailsSection.classList.toggle('d-none');
+// Color palette for subjects - SOLID COLORS
+const COLOR_PALETTE = [
+    '#667eea', '#f093fb', '#4facfe', '#43e97b', '#fa709a',
+    '#976d33', '#3d6664', '#ff9a9e', '#a18cd1', '#8f7770',
+    '#a18d4a', '#74b9ff', '#fd79a8', '#fdcb6e', '#55a3ff'
+];
+
+// Add CSS classes dynamically - SOLID COLORS
+function addSubjectColorStyles() {
+    if (document.getElementById('subject-color-styles')) {
+        return; // Already added
     }
+    
+    const style = document.createElement('style');
+    style.id = 'subject-color-styles';
+    
+    let css = '';
+    COLOR_PALETTE.forEach((color, index) => {
+        css += `
+            .subject-color-${index} {
+                background-color: ${color} !important;
+                color: white !important;
+                border: none !important;
+            }
+            .legend-color.subject-color-${index} {
+                background-color: ${color} !important;
+                width: 20px;
+                height: 20px;
+                border-radius: 4px;
+                display: inline-block;
+                margin-right: 8px;
+            }
+        `;
+    });
+    
+    style.textContent = css;
+    document.head.appendChild(style);
 }
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
+    // Add subject color styles
+    addSubjectColorStyles();
+    
     // Check if we're running from file:// protocol
     if (window.location.protocol === 'file:') {
         showApiStatus('⚠️ Running from file:// protocol. For best experience, serve files through a web server. See instructions below.', 'warning');

@@ -109,7 +109,7 @@
     {
       "subject": "Commerce",
       "grade": "10",
-      "possibleTeachers": ["Sarath Hettiarachchi", "Danul Jayasinghe"],
+      "possibleTeachers": ["commerce 3", "commerce 2","Commerce teacher 1"],
       "periodsPerWeek": 3,
       "maxPeriodsPerDay": 2
     },

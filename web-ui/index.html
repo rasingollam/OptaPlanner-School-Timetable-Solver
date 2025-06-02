@@ -64,67 +64,71 @@
             <!-- Results Panel -->
             <div class="col-lg-8">
                 <div id="resultsPanel" class="d-none">
-                    <!-- Score and Summary -->
+                    <!-- Score Display -->
                     <div class="row mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="card">
                                 <div class="card-body text-center">
-                                    <h5 class="card-title">Solution Score</h5>
-                                    <div id="scoreDisplay" class="h3"></div>
-                                    <div id="feasibilityBadge"></div>
+                                    <h6 class="card-title">Solution Score</h6>
+                                    <div id="scoreDisplay" class="h3">-</div>
+                                    <div id="feasibilityBadge">-</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="card">
                                 <div class="card-body text-center">
-                                    <h5 class="card-title">Unassigned Periods</h5>
-                                    <div id="unassignedCount" class="h3"></div>
-                                    <div id="unassignedMessage" class="small text-muted"></div>
+                                    <h6 class="card-title">Unassigned Periods</h6>
+                                    <div id="unassignedCount" class="h3">0</div>
+                                    <div id="unassignedMessage" class="text-muted">All periods assigned</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Export Options</h6>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportTimetableAsCSV()">
+                                            <i class="fas fa-file-csv me-1"></i>CSV
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info btn-sm" onclick="exportFeasibilityReport()">
+                                            <i class="fas fa-file-alt me-1"></i>Report
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Unassigned Periods Detail -->
-                    <div class="card mb-4" id="unassignedDetailCard" style="display: none;">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
-                                Unassigned Periods Analysis
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div id="unassignedDetails"></div>
-                        </div>
-                    </div>
+                    <!-- Feasibility Analysis Section -->
+                    <div id="feasibilityAnalysis" class="mb-4"></div>
 
-                    <!-- Class Selection -->
+                    <!-- Class Timetable Display -->
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-users me-2"></i>
-                                Class Timetables
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="classSelect" class="form-label">Select Class:</label>
-                                <select class="form-select" id="classSelect" onchange="displayTimetable()">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    Class Timetables
+                                </h6>
+                                <select id="classSelect" class="form-select form-select-sm" style="width: auto;" onchange="displayTimetable()">
                                     <option value="">Choose a class...</option>
                                 </select>
                             </div>
+                        </div>
+                        <div class="card-body">
                             <div id="timetableDisplay"></div>
                         </div>
                     </div>
 
-                    <!-- Teacher Workload Summary -->
+                    <!-- Teacher Workload & Analysis -->
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-chalkboard-teacher me-2"></i>
-                                Teacher Workload Summary
-                            </h5>
+                            <h6 class="mb-0">
+                                <i class="fas fa-users me-2"></i>
+                                Teacher Workload & Analysis
+                            </h6>
                         </div>
                         <div class="card-body">
                             <div id="teacherWorkload"></div>
