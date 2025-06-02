@@ -1,15 +1,55 @@
 optaplanner:
   solver:
+    # MAXIMUM ACCURACY: 30-minute solving time for highest quality
     termination:
-      spent-limit: PT30S # 30 seconds solving time
-    domain-access-type: REFLECTION
-  solver-manager:
-    parallel-solver-count: AUTO
+      spent-limit: 30m # 30 minutes total solving time (60x increase)
+      unimproved-spent-limit: 5m # Stop if no improvement for 5 minutes
+      best-score-limit: "0hard/*soft" # Stop when perfect solution found
+    
+    # Multi-phase configuration for maximum exploration
+    phase:
+      # Phase 1: Construction heuristic (fast initial solution)
+      - construction-heuristic:
+          construction-heuristic-type: FIRST_FIT
+      
+      # Phase 2: Initial exploration (5 minutes)
+      - local-search:
+          local-search-type: LATE_ACCEPTANCE
+          termination:
+            spent-limit: 5m
+      
+      # Phase 3: Deep optimization (10 minutes)
+      - local-search:
+          local-search-type: LATE_ACCEPTANCE
+          termination:
+            spent-limit: 10m
+      
+      # Phase 4: Fine-tuning phase (15 minutes)
+      - local-search:
+          local-search-type: LATE_ACCEPTANCE
+          termination:
+            spent-limit: 15m
+    
+    # Performance settings for long runs
+    environment-mode: REPRODUCIBLE
+    move-thread-count: AUTO
 
-server:
-  port: 8080
-
+# Enhanced logging for long-running solver monitoring
 logging:
   level:
+    org.optaplanner.core.impl.solver: INFO
+    org.optaplanner.core.impl.localsearch: INFO
+    org.optaplanner.core.impl.phase: INFO
     com.school.timetabling: DEBUG
-    org.optaplanner: INFO
+    # Reduce Spring noise during long runs
+    org.springframework: WARN
+    org.hibernate: WARN
+
+# Server settings optimized for long-running processes
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  # Increase timeout for long-running requests
+  tomcat:
+    connection-timeout: 1800000 # 30 minutes

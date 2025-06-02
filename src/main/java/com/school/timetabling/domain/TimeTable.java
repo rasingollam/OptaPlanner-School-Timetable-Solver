@@ -8,6 +8,7 @@ import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @PlanningSolution
 public class TimeTable {
@@ -45,4 +46,13 @@ public class TimeTable {
 
     public HardSoftScore getScore() { return score; }
     public void setScore(HardSoftScore score) { this.score = score; }
+
+    @ValueRangeProvider(id = "teacherRange")
+    public List<String> getTeacherList() {
+        // Collect all unique teachers from all lessons
+        return lessonList.stream()
+            .flatMap(lesson -> lesson.getPossibleTeachers().stream())
+            .distinct()
+            .collect(Collectors.toList());
+    }
 }

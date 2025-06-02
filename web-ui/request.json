@@ -1,0 +1,194 @@
+{
+  "timeslotList": [
+    {"id": 1, "dayOfWeek": "MONDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 2, "dayOfWeek": "MONDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 3, "dayOfWeek": "MONDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 4, "dayOfWeek": "MONDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 5, "dayOfWeek": "MONDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 6, "dayOfWeek": "MONDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 7, "dayOfWeek": "MONDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 8, "dayOfWeek": "MONDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+
+    {"id": 9, "dayOfWeek": "TUESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 10, "dayOfWeek": "TUESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 11, "dayOfWeek": "TUESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 12, "dayOfWeek": "TUESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 13, "dayOfWeek": "TUESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 14, "dayOfWeek": "TUESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 15, "dayOfWeek": "TUESDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 16, "dayOfWeek": "TUESDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+
+    {"id": 17, "dayOfWeek": "WEDNESDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 18, "dayOfWeek": "WEDNESDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 19, "dayOfWeek": "WEDNESDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 20, "dayOfWeek": "WEDNESDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 21, "dayOfWeek": "WEDNESDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 22, "dayOfWeek": "WEDNESDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 23, "dayOfWeek": "WEDNESDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 24, "dayOfWeek": "WEDNESDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+
+    {"id": 25, "dayOfWeek": "THURSDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 26, "dayOfWeek": "THURSDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 27, "dayOfWeek": "THURSDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 28, "dayOfWeek": "THURSDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 29, "dayOfWeek": "THURSDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 30, "dayOfWeek": "THURSDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 31, "dayOfWeek": "THURSDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 32, "dayOfWeek": "THURSDAY", "startTime": "12:50:00", "endTime": "13:30:00"},
+
+    {"id": 33, "dayOfWeek": "FRIDAY", "startTime": "07:50:00", "endTime": "08:30:00"},
+    {"id": 34, "dayOfWeek": "FRIDAY", "startTime": "08:30:00", "endTime": "09:10:00"},
+    {"id": 35, "dayOfWeek": "FRIDAY", "startTime": "09:10:00", "endTime": "09:50:00"},
+    {"id": 36, "dayOfWeek": "FRIDAY", "startTime": "09:50:00", "endTime": "10:30:00"},
+    {"id": 37, "dayOfWeek": "FRIDAY", "startTime": "10:50:00", "endTime": "11:30:00"},
+    {"id": 38, "dayOfWeek": "FRIDAY", "startTime": "11:30:00", "endTime": "12:10:00"},
+    {"id": 39, "dayOfWeek": "FRIDAY", "startTime": "12:10:00", "endTime": "12:50:00"},
+    {"id": 40, "dayOfWeek": "FRIDAY", "startTime": "12:50:00", "endTime": "13:30:00"}
+  ],
+  "classList": [
+    {
+      "grade": "10",
+      "classes": ["A", "B", "C", "D","E", "F"]
+    },
+    {
+      "grade": "11",
+      "classes": ["A", "B", "C", "D","E", "F"]
+    }
+  ],
+  "teacherWorkloadConfig": {
+    "totalTimeslotsPerWeek": 240,
+    "freePeriodsPerTeacherPerWeek": 10,
+    "maxPeriodsPerTeacherPerWeek": 40
+  },
+  "subjectList": [
+    "Mathematics", "English", "Sinhala", "Science", "History", "Dancing", "Commerce", "Designing Technology", "Buddhism"
+  ],
+  "lessonAssignmentList": [
+    {
+      "subject": "Mathematics",
+      "grade": "10",
+      "possibleTeachers": ["Shehan Mallawarachchi", "Tharindu Silva", "Malinda Perera","Namal Udugama"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "English",
+      "grade": "10",
+      "possibleTeachers": ["William Shakespeare", "Jane Austen"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Sinhala",
+      "grade": "10",
+      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier", "Galileo Galilei"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Science",
+      "grade": "10",
+      "possibleTeachers": ["Albert Einstein", "Isaac Newton", "Robert Oppenheimer"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "History",
+      "grade": "10",
+      "possibleTeachers": ["Chamil Bandara", "Induwara Jayasinghe"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Dancing",
+      "grade": "10",
+      "possibleTeachers": ["Athulathmudali", "PB Gamagedara"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Commerce",
+      "grade": "10",
+      "possibleTeachers": ["commerce 3", "commerce 2","Commerce teacher 1"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Designing Technology",
+      "grade": "10",
+      "possibleTeachers": ["Siri Kumara", "Dasun Jayakodi"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Buddhism",
+      "grade": "10",
+      "possibleTeachers": ["Einstein Thero", "Newton Thero"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Mathematics",
+      "grade": "11",
+      "possibleTeachers": ["Shehan Mallawarachchi", "Tharindu Silva", "Malinda Perera","Namal Udugama"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "English",
+      "grade": "11",
+      "possibleTeachers": ["William Shakespeare", "Jane Austen"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Sinhala",
+      "grade": "11",
+      "possibleTeachers": ["Marie Curie", "Antoine Lavoisier", "Galileo Galilei"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Science",
+      "grade": "11",
+      "possibleTeachers": ["Albert Einstein", "Isaac Newton", "Robert Oppenheimer"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "History",
+      "grade": "11",
+      "possibleTeachers": ["Chamil Bandara", "Induwara Jayasinghe"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Dancing",
+      "grade": "11",
+      "possibleTeachers": ["Athulathmudali", "PB Gamagedara"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Commerce",
+      "grade": "11",
+      "possibleTeachers": ["Sarath Hettiarachchi", "Danul Jayasinghe"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Designing Technology",
+      "grade": "11",
+      "possibleTeachers": ["Siri Kumara", "Dasun Jayakodi"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Buddhism",
+      "grade": "11",
+      "possibleTeachers": ["Einstein Thero", "Newton Thero"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    }
+  ]
+}

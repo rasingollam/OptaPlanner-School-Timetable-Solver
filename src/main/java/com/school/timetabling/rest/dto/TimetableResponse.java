@@ -1,29 +1,23 @@
 package com.school.timetabling.rest.dto;
 
-import java.util.List;
 import java.util.Map;
 
 public class TimetableResponse {
-    private Map<String, StudentGroupSchedule> studentGroupSchedules;
     private String score;
     private boolean feasible;
+    private String message;
+    
+    // Using generic Map structure instead of inner classes to avoid complexity
+    private Map<String, Map<String, Map<String, Map<String, Object>>>> studentGroupSchedules;
     private Map<String, Map<String, Integer>> unassignedPeriods;
     private Map<String, Map<String, Map<String, Integer>>> detailedUnassignedPeriods;
     private Map<String, Integer> teacherWorkloadSummary;
-    private String message;
-    private UnassignedSummary unassignedSummary;
+    private Map<String, Object> unassignedSummary;
 
+    // Constructors
     public TimetableResponse() {}
 
-    // Getters and setters
-    public Map<String, StudentGroupSchedule> getStudentGroupSchedules() {
-        return studentGroupSchedules;
-    }
-
-    public void setStudentGroupSchedules(Map<String, StudentGroupSchedule> studentGroupSchedules) {
-        this.studentGroupSchedules = studentGroupSchedules;
-    }
-
+    // Getters and Setters
     public String getScore() {
         return score;
     }
@@ -38,6 +32,22 @@ public class TimetableResponse {
 
     public void setFeasible(boolean feasible) {
         this.feasible = feasible;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Map<String, Map<String, Map<String, Map<String, Object>>>> getStudentGroupSchedules() {
+        return studentGroupSchedules;
+    }
+
+    public void setStudentGroupSchedules(Map<String, Map<String, Map<String, Map<String, Object>>>> studentGroupSchedules) {
+        this.studentGroupSchedules = studentGroupSchedules;
     }
 
     public Map<String, Map<String, Integer>> getUnassignedPeriods() {
@@ -64,26 +74,17 @@ public class TimetableResponse {
         this.teacherWorkloadSummary = teacherWorkloadSummary;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public UnassignedSummary getUnassignedSummary() {
+    public Map<String, Object> getUnassignedSummary() {
         return unassignedSummary;
     }
 
-    public void setUnassignedSummary(UnassignedSummary unassignedSummary) {
+    public void setUnassignedSummary(Map<String, Object> unassignedSummary) {
         this.unassignedSummary = unassignedSummary;
     }
 
-    public static class StudentGroupSchedule {
+    // Static inner classes for better structure (optional - can be used later)
+    public static class ClassSchedule {
         private Map<String, Map<String, LessonInfo>> weekSchedule;
-
-        public StudentGroupSchedule() {}
 
         public Map<String, Map<String, LessonInfo>> getWeekSchedule() {
             return weekSchedule;
@@ -100,8 +101,7 @@ public class TimetableResponse {
         private String startTime;
         private String endTime;
 
-        public LessonInfo() {}
-
+        // Getters and Setters
         public String getSubject() {
             return subject;
         }
@@ -133,57 +133,5 @@ public class TimetableResponse {
         public void setEndTime(String endTime) {
             this.endTime = endTime;
         }
-    }
-
-    public static class UnassignedSummary {
-        private int totalUnassignedPeriods;
-        private int totalUnassignedClasses;
-        private Map<String, GradeUnassignedInfo> gradeBreakdown;
-
-        // Getters and setters
-        public int getTotalUnassignedPeriods() { return totalUnassignedPeriods; }
-        public void setTotalUnassignedPeriods(int totalUnassignedPeriods) { this.totalUnassignedPeriods = totalUnassignedPeriods; }
-
-        public int getTotalUnassignedClasses() { return totalUnassignedClasses; }
-        public void setTotalUnassignedClasses(int totalUnassignedClasses) { this.totalUnassignedClasses = totalUnassignedClasses; }
-
-        public Map<String, GradeUnassignedInfo> getGradeBreakdown() { return gradeBreakdown; }
-        public void setGradeBreakdown(Map<String, GradeUnassignedInfo> gradeBreakdown) { this.gradeBreakdown = gradeBreakdown; }
-    }
-
-    public static class GradeUnassignedInfo {
-        private int totalPeriodsNeeded;
-        private int totalClassesAffected;
-        private Map<String, SubjectUnassignedInfo> subjects;
-
-        // Getters and setters
-        public int getTotalPeriodsNeeded() { return totalPeriodsNeeded; }
-        public void setTotalPeriodsNeeded(int totalPeriodsNeeded) { this.totalPeriodsNeeded = totalPeriodsNeeded; }
-
-        public int getTotalClassesAffected() { return totalClassesAffected; }
-        public void setTotalClassesAffected(int totalClassesAffected) { this.totalClassesAffected = totalClassesAffected; }
-
-        public Map<String, SubjectUnassignedInfo> getSubjects() { return subjects; }
-        public void setSubjects(Map<String, SubjectUnassignedInfo> subjects) { this.subjects = subjects; }
-    }
-
-    public static class SubjectUnassignedInfo {
-        private int periodsPerWeek;
-        private int classesAffected;
-        private List<String> affectedClasses;
-        private String reason;
-
-        // Getters and setters
-        public int getPeriodsPerWeek() { return periodsPerWeek; }
-        public void setPeriodsPerWeek(int periodsPerWeek) { this.periodsPerWeek = periodsPerWeek; }
-
-        public int getClassesAffected() { return classesAffected; }
-        public void setClassesAffected(int classesAffected) { this.classesAffected = classesAffected; }
-
-        public List<String> getAffectedClasses() { return affectedClasses; }
-        public void setAffectedClasses(List<String> affectedClasses) { this.affectedClasses = affectedClasses; }
-
-        public String getReason() { return reason; }
-        public void setReason(String reason) { this.reason = reason; }
     }
 }
