@@ -1,10 +1,44 @@
 optaplanner:
   solver:
+    # Increase solving time for better results
     termination:
-      spent-limit: PT30S # 30 seconds solving time
-    domain-access-type: REFLECTION
-  solver-manager:
-    parallel-solver-count: AUTO
+      spent-limit: 120s  # Increased from 30s to 120s (2 minutes)
+      # Alternative: use unimproved time limit
+      # unimproved-spent-limit: 60s
+      # best-score-limit: "0hard/*soft"  # Stop when hard constraints satisfied
+    
+    # Enhanced construction heuristics
+    construction-heuristic:
+      construction-heuristic-type: FIRST_FIT_DECREASING
+      # Alternative options:
+      # FIRST_FIT, WEAKEST_FIT, STRONGEST_FIT, ALLOCATE_ENTITY_FROM_QUEUE
+    
+    # Improved local search configuration
+    local-search:
+      # Multiple local search phases for better exploration
+      local-search-type: LATE_ACCEPTANCE
+      acceptance:
+        late-acceptance-size: 400  # Increased acceptance window
+      forager:
+        accepted-count-limit: 1
+        pick-early-type: NEVER
+      
+    # Enable multiple algorithm phases
+    phase:
+      - construction-heuristic:
+          construction-heuristic-type: FIRST_FIT_DECREASING
+      - local-search:
+          local-search-type: LATE_ACCEPTANCE
+          acceptance:
+            late-acceptance-size: 200
+          termination:
+            spent-limit: 60s
+      - local-search:
+          local-search-type: SIMULATED_ANNEALING
+          acceptance:
+            simulated-annealing-starting-temperature: "0hard/100soft"
+          termination:
+            spent-limit: 60s
 
 server:
   port: 8080
@@ -13,3 +47,5 @@ logging:
   level:
     com.school.timetabling: DEBUG
     org.optaplanner: INFO
+    org.optaplanner.core.impl.solver: DEBUG
+    org.optaplanner.core.impl.localsearch: INFO

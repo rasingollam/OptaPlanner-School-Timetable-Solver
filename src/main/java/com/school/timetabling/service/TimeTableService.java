@@ -5,6 +5,7 @@ import com.school.timetabling.rest.dto.TimetableRequest;
 import com.school.timetabling.solver.TimeTableConstraintConfig;
 import org.optaplanner.core.api.solver.SolverJob;
 import org.optaplanner.core.api.solver.SolverManager;
+import org.optaplanner.core.api.solver.SolverStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,32 +36,85 @@ public class TimeTableService {
         
         UUID problemId = UUID.randomUUID();
         
-        // Test configuration one more time before solving
-        System.out.println("=== Pre-Solve Configuration Test ===");
-        for (TimetableRequest.LessonAssignment assignment : request.getLessonAssignmentList()) {
-            String subject = assignment.getSubject();
-            String grade = assignment.getGrade();
-            int actualMax = TimeTableConstraintConfig.getMaxPeriodsPerDay(subject, grade);
-            System.out.println("Pre-solve: " + subject + " - Grade " + grade + " = " + actualMax + " periods/day");
-        }
+        // Enhanced solver configuration for better results
+        System.out.println("=== Enhanced Solver Configuration ===");
+        System.out.println("Problem size: " + problem.getLessonList().size() + " lessons");
+        System.out.println("Available timeslots: " + problem.getTimeslotList().size());
+        System.out.println("Student groups: " + problem.getStudentGroupList().size());
+        System.out.println("Starting solver with enhanced multi-phase approach...");
         
         SolverJob<TimeTable, UUID> solverJob = solverManager.solve(problemId, problem);
         
+        // Monitor solving progress
+        TimeTable bestSolution = null;
+        while (!solverJob.getSolverStatus().equals(SolverStatus.NOT_SOLVING)) {
+            try {
+                bestSolution = solverJob.getFinalBestSolution();
+                if (bestSolution != null && bestSolution.getScore() != null) {
+                    System.out.println("Current best score: " + bestSolution.getScore());
+                }
+                Thread.sleep(5000); // Check every 5 seconds
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+        
         TimeTable solution = solverJob.getFinalBestSolution();
         
-        // DON'T clean up constraint configuration yet - let's see if it's still there
-        System.out.println("=== Post-Solve Configuration Test ===");
-        for (TimetableRequest.LessonAssignment assignment : request.getLessonAssignmentList()) {
-            String subject = assignment.getSubject();
-            String grade = assignment.getGrade();
-            int actualMax = TimeTableConstraintConfig.getMaxPeriodsPerDay(subject, grade);
-            System.out.println("Post-solve: " + subject + " - Grade " + grade + " = " + actualMax + " periods/day");
-        }
+        System.out.println("=== Solving Complete ===");
+        System.out.println("Final score: " + solution.getScore());
+        System.out.println("Solution feasible: " + (solution.getScore() != null && solution.getScore().isFeasible()));
+        
+        // Detailed solution analysis
+        analyzeSolutionQuality(solution);
         
         // Clean up constraint configuration
         TimeTableConstraintConfig.clearConfiguration();
         
         return solution;
+    }
+    
+    private void analyzeSolutionQuality(TimeTable solution) {
+        System.out.println("\n=== Solution Quality Analysis ===");
+        
+        int assignedLessons = 0;
+        int unassignedLessons = 0;
+        Map<String, Integer> teacherAssignments = new HashMap<>();
+        Map<String, Set<String>> dailySubjectDistribution = new HashMap<>();
+        
+        for (Lesson lesson : solution.getLessonList()) {
+            if (lesson.getTimeslot() != null) {
+                assignedLessons++;
+                teacherAssignments.merge(lesson.getTeacher(), 1, Integer::sum);
+                
+                // Track daily subject distribution - Fixed: use getGrade() + getClassName() instead of getName()
+                String key = lesson.getStudentGroup().getGrade() + lesson.getStudentGroup().getClassName() + "-" + 
+                           lesson.getTimeslot().getDayOfWeek();
+                dailySubjectDistribution.computeIfAbsent(key, k -> new HashSet<>())
+                                      .add(lesson.getSubject());
+            } else {
+                unassignedLessons++;
+            }
+        }
+        
+        System.out.println("Assigned lessons: " + assignedLessons);
+        System.out.println("Unassigned lessons: " + unassignedLessons);
+        System.out.println("Assignment rate: " + 
+            String.format("%.2f%%", (assignedLessons * 100.0) / solution.getLessonList().size()));
+        
+        // Teacher workload analysis
+        System.out.println("\nTeacher workload distribution:");
+        teacherAssignments.entrySet().stream()
+            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+            .forEach(entry -> System.out.println("  " + entry.getKey() + ": " + entry.getValue() + " periods"));
+        
+        // Subject distribution analysis
+        double avgSubjectsPerDay = dailySubjectDistribution.values().stream()
+            .mapToInt(Set::size)
+            .average()
+            .orElse(0.0);
+        System.out.println("\nAverage subjects per day per class: " + String.format("%.2f", avgSubjectsPerDay));
     }
 
     public Map<String, Map<String, Integer>> getUnassignedPeriods() {
