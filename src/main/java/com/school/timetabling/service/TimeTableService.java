@@ -36,23 +36,59 @@ public class TimeTableService {
         
         UUID problemId = UUID.randomUUID();
         
-        // Enhanced solver configuration for better results
-        System.out.println("=== Enhanced Solver Configuration ===");
+        // MAXIMUM ACCURACY solver configuration
+        System.out.println("=== MAXIMUM ACCURACY Solver Configuration ===");
         System.out.println("Problem size: " + problem.getLessonList().size() + " lessons");
         System.out.println("Available timeslots: " + problem.getTimeslotList().size());
         System.out.println("Student groups: " + problem.getStudentGroupList().size());
-        System.out.println("Starting solver with enhanced multi-phase approach...");
+        System.out.println("MAXIMUM solving time: 30 minutes (for highest quality solutions)");
+        System.out.println("Multi-phase approach: Construction → Initial (5m) → Deep (10m) → Fine-tuning (15m)");
+        System.out.println("Starting MAXIMUM ACCURACY solver...");
+        System.out.println("⚠️  This will take up to 30 minutes for best results. Please be patient.");
         
+        long startTime = System.currentTimeMillis();
         SolverJob<TimeTable, UUID> solverJob = solverManager.solve(problemId, problem);
         
-        // Monitor solving progress
+        // Enhanced progress monitoring for very long runs
         TimeTable bestSolution = null;
+        int progressCheckCount = 0;
+        String lastBestScore = "N/A";
+        long lastScoreChangeTime = startTime;
+        
         while (!solverJob.getSolverStatus().equals(SolverStatus.NOT_SOLVING)) {
             try {
                 bestSolution = solverJob.getFinalBestSolution();
                 if (bestSolution != null && bestSolution.getScore() != null) {
-                    System.out.println("Current best score: " + bestSolution.getScore());
+                    String currentScore = bestSolution.getScore().toString();
+                    long elapsedMinutes = (System.currentTimeMillis() - startTime) / 60000;
+                    long elapsedSeconds = ((System.currentTimeMillis() - startTime) / 1000) % 60;
+                    
+                    // Track score improvements
+                    if (!currentScore.equals(lastBestScore)) {
+                        lastBestScore = currentScore;
+                        lastScoreChangeTime = System.currentTimeMillis();
+                        
+                        System.out.println(String.format("[%02d:%02d] 🔄 Score improved: %s", 
+                            elapsedMinutes, elapsedSeconds, currentScore));
+                        
+                        // Check for excellent solutions
+                        if (bestSolution.getScore().isFeasible()) {
+                            int softScore = bestSolution.getScore().softScore();
+                            if (softScore >= -10) {
+                                System.out.println("🎯 EXCELLENT solution found! (Soft score: " + softScore + ")");
+                            } else if (softScore >= -50) {
+                                System.out.println("✨ HIGH-QUALITY solution found! (Soft score: " + softScore + ")");
+                            } else if (softScore >= 0) {
+                                System.out.println("🎯 PERFECT feasible solution found!");
+                            }
+                        }
+                    } else if (progressCheckCount % 24 == 0) { // Every 2 minutes
+                        long noImprovementTime = (System.currentTimeMillis() - lastScoreChangeTime) / 60000;
+                        System.out.println(String.format("[%02d:%02d] 🔍 Current: %s (no improvement for %d min)", 
+                            elapsedMinutes, elapsedSeconds, currentScore, noImprovementTime));
+                    }
                 }
+                progressCheckCount++;
                 Thread.sleep(5000); // Check every 5 seconds
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -61,10 +97,14 @@ public class TimeTableService {
         }
         
         TimeTable solution = solverJob.getFinalBestSolution();
+        long totalSolvingTime = (System.currentTimeMillis() - startTime) / 1000;
         
-        System.out.println("=== Solving Complete ===");
+        System.out.println("=== MAXIMUM ACCURACY Solving Complete ===");
+        System.out.println("Total solving time: " + formatTime(totalSolvingTime));
         System.out.println("Final score: " + solution.getScore());
         System.out.println("Solution feasible: " + (solution.getScore() != null && solution.getScore().isFeasible()));
+        System.out.println("Quality rating: " + assessSolutionQuality(solution));
+        System.out.println("🏆 Solution quality optimized with " + formatTime(totalSolvingTime) + " of computation");
         
         // Detailed solution analysis
         analyzeSolutionQuality(solution);
@@ -75,6 +115,28 @@ public class TimeTableService {
         return solution;
     }
     
+    private String formatTime(long seconds) {
+        long minutes = seconds / 60;
+        long remainingSeconds = seconds % 60;
+        return String.format("%d:%02d", minutes, remainingSeconds);
+    }
+    
+    private String assessSolutionQuality(TimeTable solution) {
+        if (solution.getScore() == null) return "Unknown";
+        
+        if (!solution.getScore().isFeasible()) {
+            return "🔴 Infeasible";
+        }
+        
+        int softScore = solution.getScore().softScore();
+        if (softScore >= -5) return "🏆 PERFECT";
+        if (softScore >= -15) return "🎯 EXCELLENT";
+        if (softScore >= -30) return "✨ VERY GOOD";
+        if (softScore >= -50) return "🟢 GOOD";
+        if (softScore >= -100) return "🟡 FAIR";
+        return "🟠 ACCEPTABLE";
+    }
+
     private void analyzeSolutionQuality(TimeTable solution) {
         System.out.println("\n=== Solution Quality Analysis ===");
         

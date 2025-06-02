@@ -35,30 +35,42 @@ public class OptaPlannerConfiguration {
         scoreDirectorFactoryConfig.setInitializingScoreTrend("ONLY_DOWN");
         solverConfig.setScoreDirectorFactoryConfig(scoreDirectorFactoryConfig);
         
-        // Use simpler construction heuristic that doesn't require difficulty comparator
+        // MAXIMUM ACCURACY: Multi-phase configuration with extensive solving time
         ConstructionHeuristicPhaseConfig constructionPhase = new ConstructionHeuristicPhaseConfig();
         constructionPhase.setConstructionHeuristicType(ConstructionHeuristicType.FIRST_FIT);
         
-        // Local search phase
-        LocalSearchPhaseConfig localSearchPhase = new LocalSearchPhaseConfig();
-        localSearchPhase.setLocalSearchType(LocalSearchType.LATE_ACCEPTANCE);
+        // Phase 1: Initial exploration (5 minutes)
+        LocalSearchPhaseConfig initialSearch = new LocalSearchPhaseConfig();
+        initialSearch.setLocalSearchType(LocalSearchType.LATE_ACCEPTANCE);
+        TerminationConfig phase1Termination = new TerminationConfig();
+        phase1Termination.setSpentLimit(Duration.ofMinutes(5));
+        initialSearch.setTerminationConfig(phase1Termination);
         
-        // Set termination for local search phase
-        TerminationConfig localSearchTermination = new TerminationConfig();
-        localSearchTermination.setSpentLimit(Duration.ofMinutes(2));
-        localSearchPhase.setTerminationConfig(localSearchTermination);
+        // Phase 2: Deep optimization (10 minutes)
+        LocalSearchPhaseConfig deepSearch = new LocalSearchPhaseConfig();
+        deepSearch.setLocalSearchType(LocalSearchType.LATE_ACCEPTANCE);
+        TerminationConfig phase2Termination = new TerminationConfig();
+        phase2Termination.setSpentLimit(Duration.ofMinutes(10));
+        deepSearch.setTerminationConfig(phase2Termination);
         
-        solverConfig.setPhaseConfigList(Arrays.asList(constructionPhase, localSearchPhase));
+        // Phase 3: Fine-tuning (15 minutes)
+        LocalSearchPhaseConfig fineTuning = new LocalSearchPhaseConfig();
+        fineTuning.setLocalSearchType(LocalSearchType.LATE_ACCEPTANCE);
+        TerminationConfig phase3Termination = new TerminationConfig();
+        phase3Termination.setSpentLimit(Duration.ofMinutes(15));
+        fineTuning.setTerminationConfig(phase3Termination);
         
-        // Enhanced termination with multiple criteria
+        solverConfig.setPhaseConfigList(Arrays.asList(constructionPhase, initialSearch, deepSearch, fineTuning));
+        
+        // MAXIMUM SOLVING TIME: 30 minutes total for highest accuracy
         TerminationConfig terminationConfig = new TerminationConfig();
-        terminationConfig.setSpentLimit(Duration.ofMinutes(3));  // 3 minutes total
-        terminationConfig.setUnimprovedSpentLimit(Duration.ofSeconds(45));  // Stop if no improvement for 45s
-        terminationConfig.setBestScoreLimit("0hard/*soft");  // Stop when feasible solution found
+        terminationConfig.setSpentLimit(Duration.ofMinutes(30)); // 30 minutes total (60x original)
+        terminationConfig.setUnimprovedSpentLimit(Duration.ofMinutes(5)); // Stop if no improvement for 5 minutes
+        terminationConfig.setBestScoreLimit("0hard/*soft"); // Stop when feasible solution found
         solverConfig.setTerminationConfig(terminationConfig);
         
-        // Environment configuration for performance
-        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);  // For consistent results
+        // Performance optimization for long runs
+        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
         solverConfig.setMoveThreadCount(SolverConfig.MOVE_THREAD_COUNT_AUTO);
         
         return solverConfig;

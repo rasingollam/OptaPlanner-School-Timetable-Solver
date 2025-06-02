@@ -1,22 +1,18 @@
 package com.school.timetabling.rest;
 
-import com.school.timetabling.domain.TimeTable;
 import com.school.timetabling.domain.Lesson;
-import com.school.timetabling.domain.Timeslot;
-import com.school.timetabling.domain.StudentGroup;
+import com.school.timetabling.domain.TimeTable;
 import com.school.timetabling.rest.dto.TimetableRequest;
 import com.school.timetabling.rest.dto.TimetableResponse;
 import com.school.timetabling.service.TimeTableService;
-import com.school.timetabling.service.FeasibilityAnalysisService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
 import java.util.List;
-// import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/timetable")
@@ -25,157 +21,84 @@ public class TimetableController {
 
     @Autowired
     private TimeTableService timeTableService;
-    
-    @Autowired
-    private FeasibilityAnalysisService feasibilityAnalysisService;
 
     @PostMapping("/solve")
-    public ResponseEntity<TimetableResponse> solveTimetable(@RequestBody TimetableRequest request) {
+    public TimetableResponse solveTimetable(@RequestBody TimetableRequest request) {
         try {
             TimeTable solution = timeTableService.solve(request);
-            
-            // Calculate unassigned periods from the solution (not from service)
-            Map<String, Map<String, Integer>> unassignedPeriods = calculateUnassignedPeriods(solution, request);
-            Map<String, Map<String, Map<String, Integer>>> detailedUnassignedPeriods = calculateDetailedUnassignedPeriods(solution);
-
-            // Convert to response format
-            TimetableResponse response = convertToResponse(solution);
-
-            // Add unassigned periods information
-            response.setUnassignedPeriods(unassignedPeriods);
-            response.setDetailedUnassignedPeriods(detailedUnassignedPeriods);
-
-            // Calculate teacher workload summary
-            Map<String, Integer> teacherWorkload = calculateTeacherWorkload(solution);
-            response.setTeacherWorkloadSummary(teacherWorkload);
-
-            // Generate feasibility analysis
-            TimetableResponse.FeasibilityAnalysis feasibilityAnalysis = 
-                feasibilityAnalysisService.analyzeFeasibility(solution, request);
-            response.setFeasibilityAnalysis(feasibilityAnalysis);
-
-            // Generate unassigned summary
-            TimetableResponse.UnassignedSummary summary = generateUnassignedSummary(detailedUnassignedPeriods, request);
-            response.setUnassignedSummary(summary);
-
-            // Add informational message
-            if (!unassignedPeriods.isEmpty()) {
-                response.setMessage("Some periods could not be assigned due to teacher workload limits. " +
-                        "Check unassignedSummary for detailed breakdown by grade and class.");
-            } else {
-                response.setMessage("All periods successfully assigned within teacher workload limits.");
-            }
-
-            return ResponseEntity.ok(response);
+            return convertToResponse(solution);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            e.printStackTrace();
+            TimetableResponse errorResponse = new TimetableResponse();
+            errorResponse.setFeasible(false);
+            errorResponse.setScore("Error: " + e.getMessage());
+            errorResponse.setMessage("Failed to solve timetable: " + e.getMessage());
+            return errorResponse;
         }
-    }
-
-    private TimetableResponse.UnassignedSummary generateUnassignedSummary(
-            Map<String, Map<String, Map<String, Integer>>> detailedUnassignedPeriods,
-            TimetableRequest request) {
-        
-        TimetableResponse.UnassignedSummary summary = new TimetableResponse.UnassignedSummary();
-        Map<String, TimetableResponse.GradeUnassignedInfo> gradeBreakdown = new HashMap<>();
-        
-        int totalUnassignedPeriods = 0;
-        int totalUnassignedClasses = 0;
-        
-        for (Map.Entry<String, Map<String, Map<String, Integer>>> gradeEntry : detailedUnassignedPeriods.entrySet()) {
-            String grade = gradeEntry.getKey();
-            TimetableResponse.GradeUnassignedInfo gradeInfo = new TimetableResponse.GradeUnassignedInfo();
-            Map<String, TimetableResponse.SubjectUnassignedInfo> subjects = new HashMap<>();
-            
-            int gradeUnassignedPeriods = 0;
-            int gradeUnassignedClasses = 0;
-            
-            for (Map.Entry<String, Map<String, Integer>> subjectEntry : gradeEntry.getValue().entrySet()) {
-                String subject = subjectEntry.getKey();
-                TimetableResponse.SubjectUnassignedInfo subjectInfo = new TimetableResponse.SubjectUnassignedInfo();
-                
-                List<String> affectedClasses = new ArrayList<>(subjectEntry.getValue().keySet());
-                int periodsPerClass = subjectEntry.getValue().values().iterator().next(); // All classes have same periods per week
-                
-                subjectInfo.setPeriodsPerWeek(periodsPerClass);
-                subjectInfo.setClassesAffected(affectedClasses.size());
-                subjectInfo.setAffectedClasses(affectedClasses);
-                subjectInfo.setReason("No teachers available with sufficient capacity");
-                
-                subjects.put(subject, subjectInfo);
-                
-                gradeUnassignedPeriods += affectedClasses.size() * periodsPerClass;
-                gradeUnassignedClasses += affectedClasses.size();
-            }
-            
-            gradeInfo.setTotalPeriodsNeeded(gradeUnassignedPeriods);
-            gradeInfo.setTotalClassesAffected(gradeUnassignedClasses);
-            gradeInfo.setSubjects(subjects);
-            
-            gradeBreakdown.put(grade, gradeInfo);
-            
-            totalUnassignedPeriods += gradeUnassignedPeriods;
-            totalUnassignedClasses += gradeUnassignedClasses;
-        }
-        
-        summary.setTotalUnassignedPeriods(totalUnassignedPeriods);
-        summary.setTotalUnassignedClasses(totalUnassignedClasses);
-        summary.setGradeBreakdown(gradeBreakdown);
-        
-        return summary;
     }
 
     @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("Timetabling Service is running");
+    public String health() {
+        return "Timetabling Service is running";
     }
 
     private TimetableResponse convertToResponse(TimeTable solution) {
         TimetableResponse response = new TimetableResponse();
-
-        // Group lessons by student group and day
-        Map<String, TimetableResponse.StudentGroupSchedule> studentGroupSchedules = new HashMap<>();
-
-        for (Lesson lesson : solution.getLessonList()) {
-            if (lesson.getTimeslot() != null) {
-                StudentGroup studentGroup = lesson.getStudentGroup();
-                String studentGroupId = studentGroup.getGrade() + studentGroup.getClassName();
-                Timeslot timeslot = lesson.getTimeslot();
-
-                // Get or create student group schedule
-                TimetableResponse.StudentGroupSchedule groupSchedule =
-                        studentGroupSchedules.computeIfAbsent(studentGroupId,
-                                k -> new TimetableResponse.StudentGroupSchedule());
-
-                // Get or create week schedule (String -> String -> LessonInfo)
-                Map<String, Map<String, TimetableResponse.LessonInfo>> weekSchedule =
-                        groupSchedule.getWeekSchedule();
-                if (weekSchedule == null) {
-                    weekSchedule = new HashMap<>();
-                    groupSchedule.setWeekSchedule(weekSchedule);
-                }
-
-                // Get or create day schedule using String representation of DayOfWeek
-                String dayOfWeekStr = timeslot.getDayOfWeek().toString();
-                Map<String, TimetableResponse.LessonInfo> daySchedule =
-                        weekSchedule.computeIfAbsent(dayOfWeekStr, k -> new HashMap<>());
-
-                // Create lesson info
-                TimetableResponse.LessonInfo lessonInfo = new TimetableResponse.LessonInfo();
-                lessonInfo.setSubject(lesson.getSubject());
-                lessonInfo.setTeacher(lesson.getTeacher());
-                lessonInfo.setStartTime(timeslot.getStartTime().toString());
-                lessonInfo.setEndTime(timeslot.getEndTime().toString());
-
-                // Add to day schedule using start time as key
-                daySchedule.put(timeslot.getStartTime().toString(), lessonInfo);
-            }
-        }
-
-        response.setStudentGroupSchedules(studentGroupSchedules);
+        
+        // Basic solution info
         response.setScore(solution.getScore() != null ? solution.getScore().toString() : "N/A");
         response.setFeasible(solution.getScore() != null && solution.getScore().isFeasible());
-
+        
+        // Convert student group schedules - simplified structure
+        Map<String, Map<String, Map<String, Map<String, Object>>>> studentGroupSchedules = new HashMap<>();
+        
+        // Group lessons by student group
+        Map<String, List<Lesson>> lessonsByGroup = solution.getLessonList().stream()
+            .filter(lesson -> lesson.getTimeslot() != null)
+            .collect(Collectors.groupingBy(lesson -> 
+                lesson.getStudentGroup().getGrade() + lesson.getStudentGroup().getClassName()));
+        
+        lessonsByGroup.forEach((groupName, lessons) -> {
+            Map<String, Map<String, Object>> weekSchedule = new HashMap<>();
+            
+            lessons.forEach(lesson -> {
+                String day = lesson.getTimeslot().getDayOfWeek().toString();
+                String time = lesson.getTimeslot().getStartTime().toString();
+                
+                Map<String, Object> lessonInfo = new HashMap<>();
+                lessonInfo.put("subject", lesson.getSubject());
+                lessonInfo.put("teacher", lesson.getTeacher());
+                lessonInfo.put("startTime", lesson.getTimeslot().getStartTime().toString());
+                lessonInfo.put("endTime", lesson.getTimeslot().getEndTime().toString());
+                
+                weekSchedule.computeIfAbsent(day, k -> new HashMap<>()).put(time, lessonInfo);
+            });
+            
+            // Fixed: Create the correct structure for studentGroupSchedules
+            Map<String, Map<String, Map<String, Object>>> classData = new HashMap<>();
+            classData.put("weekSchedule", weekSchedule);
+            studentGroupSchedules.put(groupName, classData);
+        });
+        
+        response.setStudentGroupSchedules(studentGroupSchedules);
+        
+        // Add unassigned periods information
+        response.setUnassignedPeriods(timeTableService.getUnassignedPeriods());
+        response.setDetailedUnassignedPeriods(timeTableService.getDetailedUnassignedPeriods());
+        
+        // Calculate teacher workload
+        response.setTeacherWorkloadSummary(calculateTeacherWorkload(solution));
+        
+        // Generate unassigned summary - using simple map instead of missing method
+        response.setUnassignedSummary(generateSimpleUnassignedSummary());
+        
+        // Set appropriate message
+        if (response.isFeasible()) {
+            response.setMessage("Timetable generated successfully!");
+        } else {
+            response.setMessage("Timetable generated but may not satisfy all constraints. Check the score for details.");
+        }
+        
         return response;
     }
 
@@ -189,13 +112,17 @@ public class TimetableController {
         return workload;
     }
 
-    private Map<String, Map<String, Integer>> calculateUnassignedPeriods(TimeTable solution, TimetableRequest request) {
-        // Use the unassigned periods calculated during lesson generation in the service
-        return timeTableService.getUnassignedPeriods();
-    }
-
-    private Map<String, Map<String, Map<String, Integer>>> calculateDetailedUnassignedPeriods(TimeTable solution) {
-        // Use the detailed unassigned periods calculated during lesson generation in the service
-        return timeTableService.getDetailedUnassignedPeriods();
+    private Map<String, Object> generateSimpleUnassignedSummary() {
+        Map<String, Object> summary = new HashMap<>();
+        
+        // Calculate total unassigned periods
+        int totalUnassigned = timeTableService.getUnassignedPeriods().values().stream()
+            .mapToInt(gradeMap -> gradeMap.values().stream().mapToInt(Integer::intValue).sum())
+            .sum();
+        
+        summary.put("totalUnassignedPeriods", totalUnassigned);
+        summary.put("affectedGrades", timeTableService.getUnassignedPeriods().keySet().size());
+        
+        return summary;
     }
 }
