@@ -38,34 +38,34 @@ public class OptaPlannerConfiguration {
         // MAXIMUM ACCURACY: Multi-phase configuration with extensive solving time
         ConstructionHeuristicPhaseConfig constructionPhase = new ConstructionHeuristicPhaseConfig();
         constructionPhase.setConstructionHeuristicType(ConstructionHeuristicType.FIRST_FIT);
-        
-        // Phase 1: Initial exploration (5 minutes)
+
+        // Phase 1: Initial exploration (1 minute)
         LocalSearchPhaseConfig initialSearch = new LocalSearchPhaseConfig();
         initialSearch.setLocalSearchType(LocalSearchType.LATE_ACCEPTANCE);
         TerminationConfig phase1Termination = new TerminationConfig();
-        phase1Termination.setSpentLimit(Duration.ofMinutes(5));
+        phase1Termination.setSpentLimit(Duration.ofMinutes(1));
         initialSearch.setTerminationConfig(phase1Termination);
         
-        // Phase 2: Deep optimization (10 minutes)
+        // Phase 2: Deep optimization (2 minutes)
         LocalSearchPhaseConfig deepSearch = new LocalSearchPhaseConfig();
         deepSearch.setLocalSearchType(LocalSearchType.LATE_ACCEPTANCE);
         TerminationConfig phase2Termination = new TerminationConfig();
-        phase2Termination.setSpentLimit(Duration.ofMinutes(10));
+        phase2Termination.setSpentLimit(Duration.ofMinutes(2));
         deepSearch.setTerminationConfig(phase2Termination);
         
-        // Phase 3: Fine-tuning (15 minutes)
+        // Phase 3: Fine-tuning (2 minutes)
         LocalSearchPhaseConfig fineTuning = new LocalSearchPhaseConfig();
         fineTuning.setLocalSearchType(LocalSearchType.LATE_ACCEPTANCE);
         TerminationConfig phase3Termination = new TerminationConfig();
-        phase3Termination.setSpentLimit(Duration.ofMinutes(15));
+        phase3Termination.setSpentLimit(Duration.ofMinutes(2));
         fineTuning.setTerminationConfig(phase3Termination);
         
         solverConfig.setPhaseConfigList(Arrays.asList(constructionPhase, initialSearch, deepSearch, fineTuning));
         
         // MAXIMUM SOLVING TIME: 30 minutes total for highest accuracy
         TerminationConfig terminationConfig = new TerminationConfig();
-        terminationConfig.setSpentLimit(Duration.ofMinutes(30)); // 30 minutes total (60x original)
-        terminationConfig.setUnimprovedSpentLimit(Duration.ofMinutes(5)); // Stop if no improvement for 5 minutes
+        terminationConfig.setSpentLimit(Duration.ofMinutes(5)); // 5 minutes total (60x original)
+        terminationConfig.setUnimprovedSpentLimit(Duration.ofMinutes(1)); // Stop if no improvement for 1 minute
         terminationConfig.setBestScoreLimit("0hard/*soft"); // Stop when feasible solution found
         solverConfig.setTerminationConfig(terminationConfig);
         

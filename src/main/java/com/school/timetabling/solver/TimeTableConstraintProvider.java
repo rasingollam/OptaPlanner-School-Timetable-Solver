@@ -49,20 +49,12 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                     int maxPeriodsPerDay = TimeTableConstraintConfig.getMaxPeriodsPerDay(subject, studentGroup.getGrade());
                     boolean violates = lessonCount > maxPeriodsPerDay;
                     
-                    if (violates) {
-                        System.out.println("CONSTRAINT VIOLATION: " + studentGroup.getGrade() + studentGroup.getClassName() + 
-                                         " has " + lessonCount + " " + subject + " periods on " + dayOfWeek + 
-                                         " (max allowed: " + maxPeriodsPerDay + ")");
-                    }
-                    
                     return violates;
                 })
                 .penalize(HardSoftScore.ONE_HARD,
                         (studentGroup, subject, dayOfWeek, lessonCount) -> {
                             int maxPeriodsPerDay = TimeTableConstraintConfig.getMaxPeriodsPerDay(subject, studentGroup.getGrade());
                             int violation = lessonCount - maxPeriodsPerDay;
-                            System.out.println("PENALTY: " + violation + " points for " + subject + " in " + 
-                                             studentGroup.getGrade() + studentGroup.getClassName() + " on " + dayOfWeek);
                             return violation;
                         })
                 .asConstraint("Max periods per day per subject");
@@ -81,8 +73,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                     (teacher, lessonCount) -> {
                         int maxPeriodsPerTeacher = TimeTableConstraintConfig.getMaxPeriodsPerTeacher();
                         int excess = lessonCount - maxPeriodsPerTeacher;
-                        System.out.println("Teacher workload violation: " + teacher + " has " + lessonCount + 
-                                         " lessons (limit: " + maxPeriodsPerTeacher + ", excess: " + excess + ")");
+
                         return excess;
                     })
                 .asConstraint("Teacher workload limit");
