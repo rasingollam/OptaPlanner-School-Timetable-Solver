@@ -47,12 +47,20 @@
   ],
   "classList": [
     {
+      "grade": "8",
+      "classes": ["A", "B", "C", "D", "E", "F"]
+    },
+    {
+      "grade": "9",
+      "classes": ["A", "B", "C", "D", "E", "F"]
+    },
+    {
       "grade": "10",
-      "classes": ["A", "B", "C", "D","E", "F"]
+      "classes": ["A", "B", "C", "D", "E", "F"]
     },
     {
       "grade": "11",
-      "classes": ["A", "B", "C", "D","E", "F"]
+      "classes": ["A", "B", "C", "D", "E", "F"]
     }
   ],
   "teacherWorkloadConfig": {
@@ -63,6 +71,132 @@
     "Mathematics", "English", "Sinhala", "Science", "History", "Dancing", "Commerce", "Designing Technology", "Buddhism"
   ],
   "lessonAssignmentList": [
+    {
+      "subject": "Mathematics",
+      "grade": "8",
+      "possibleTeachers": ["Kamal Perera", "Nimali Silva"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "English",
+      "grade": "8",
+      "possibleTeachers": ["Sunil Fernando", "Anusha Kumari"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Sinhala",
+      "grade": "8",
+      "possibleTeachers": ["Ruwan Jayakody", "Dilani Peiris"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Science",
+      "grade": "8",
+      "possibleTeachers": ["Asela Bandara", "Chamari Athukorala"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "History",
+      "grade": "8",
+      "possibleTeachers": ["Upul Shantha", "Manjula Devi"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Dancing",
+      "grade": "8",
+      "possibleTeachers": ["Kanthi Ranathunga", "Pradeep Kumara"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Commerce",
+      "grade": "8",
+      "possibleTeachers": ["Grade8 Commerce1", "Grade8 Commerce2"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Designing Technology",
+      "grade": "8",
+      "possibleTeachers": ["Grade8 DT1", "Grade8 DT2"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Buddhism",
+      "grade": "8",
+      "possibleTeachers": ["Grade8 Monk1", "Grade8 Monk2"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Mathematics",
+      "grade": "9",
+      "possibleTeachers": ["Ajith Gunawardana", "Samanthi Dias"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "English",
+      "grade": "9",
+      "possibleTeachers": ["Lalith Weerasinghe", "Priya Rajapakse"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Sinhala",
+      "grade": "9",
+      "possibleTeachers": ["Jagath Alwis", "Ishara Samarakoon"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Science",
+      "grade": "9",
+      "possibleTeachers": ["Mahesh Senanayake", "Deepika Gallage"],
+      "periodsPerWeek": 6,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "History",
+      "grade": "9",
+      "possibleTeachers": ["Ranjith De Silva", "Niluka Herath"],
+      "periodsPerWeek": 5,
+      "maxPeriodsPerDay": 1
+    },
+    {
+      "subject": "Dancing",
+      "grade": "9",
+      "possibleTeachers": ["Wasantha Kumudu", "Nayana Damayanthi"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Commerce",
+      "grade": "9",
+      "possibleTeachers": ["Grade9 Commerce1", "Grade9 Commerce2"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Designing Technology",
+      "grade": "9",
+      "possibleTeachers": ["Grade9 DT1", "Grade9 DT2"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
+    {
+      "subject": "Buddhism",
+      "grade": "9",
+      "possibleTeachers": ["Grade9 Monk1", "Grade9 Monk2"],
+      "periodsPerWeek": 3,
+      "maxPeriodsPerDay": 2
+    },
     {
       "subject": "Mathematics",
       "grade": "10",
