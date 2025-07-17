@@ -56,7 +56,6 @@
     }
   ],
   "teacherWorkloadConfig": {
-    "totalTimeslotsPerWeek": 240,
     "freePeriodsPerTeacherPerWeek": 10,
     "maxPeriodsPerTeacherPerWeek": 40
   },
